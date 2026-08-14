@@ -851,11 +851,10 @@ html[data-tema="oscuro"] .leaflet-control-scale-line{ background:rgba(16,18,21,.
 .layers-body .opt i{ width:7px; height:7px; border-radius:50%; background:currentColor; opacity:.3; flex:0 0 auto; }
 .layers-body .opt.on i{ opacity:1; }
 .layers-body hr{ border:0; border-top:1px solid var(--line-soft); margin:6px 3px; }
-.colores{ padding:4px 4px 2px; }
-.colorrow{ display:flex; align-items:center; gap:9px; height:34px; padding:0 5px; cursor:pointer; }
-.colorrow input[type=color]{ width:30px; height:22px; padding:0; border:1px solid var(--line);
-  border-radius:4px; background:none; cursor:pointer; flex:0 0 auto; }
-.colorrow span{ font:500 12px/1 var(--sans); color:var(--ink-dim); }
+.colorcampo{ display:flex; align-items:stretch; gap:9px; }
+.colorcampo input[type=color]{ width:46px; height:44px; padding:2px; border:1px solid var(--line);
+  border-radius:var(--r-sm); background:var(--surface-2); cursor:pointer; flex:0 0 auto; }
+.colorcampo i.trama.vista{ flex:1; height:44px; margin:0; }
 .rango{ display:flex; align-items:center; gap:9px; padding:5px 9px 0; }
 .rango input[type=range]{ flex:1; accent-color:var(--accent); }
 .rango span{ font:600 11px/1 var(--mono); color:var(--ink-faint); width:34px; text-align:right; }
@@ -913,37 +912,37 @@ aside{ width:var(--aside-w); flex:0 0 var(--aside-w); background:var(--surface);
 /* ---------- Modal ---------- */
 .scrim{ position:fixed; inset:0; z-index:2000; background:rgba(24,26,28,.42);
   display:flex; align-items:center; justify-content:center; padding:16px; backdrop-filter:blur(3px); }
-.modal{ width:100%; max-width:460px; max-height:92dvh; overflow-y:auto; background:var(--surface);
-  border:1px solid var(--line); border-radius:12px; box-shadow:0 20px 56px rgba(24,26,28,.22); }
-.modal-head{ padding:13px 16px 11px; border-bottom:1px solid var(--line-soft); }
-.modal-head h2{ margin:0; font:650 14px/1.2 var(--sans); display:flex; align-items:center; gap:8px; }
+.modal{ width:100%; max-width:560px; max-height:94dvh; overflow-y:auto; background:var(--surface);
+  border:1px solid var(--line); border-radius:14px; box-shadow:0 24px 64px rgba(24,26,28,.22); }
+.modal-head{ padding:18px 22px 15px; border-bottom:1px solid var(--line-soft); }
+.modal-head h2{ margin:0; font:650 16px/1.2 var(--sans); display:flex; align-items:center; gap:10px; }
 .modal-head h2 i{ width:11px; height:11px; border-radius:3px; flex:0 0 auto; }
-.modal-head p{ margin:6px 0 0; font:400 11px/1.45 var(--mono); color:var(--ink-faint); }
-.modal-body{ padding:13px 16px; display:flex; flex-direction:column; gap:10px; }
-.field label{ display:block; font:600 11px/1 var(--sans); color:var(--ink-dim); margin-bottom:4px; }
-.field input,.field select,.field textarea{ font-family:var(--sans); resize:vertical; min-height:54px; }
+.modal-head p{ margin:9px 0 0; font:400 12.5px/1.6 var(--mono); color:var(--ink-faint); }
+.modal-body{ padding:18px 22px; display:flex; flex-direction:column; gap:15px; }
+.field label{ display:block; font:600 12px/1 var(--sans); color:var(--ink-dim); margin-bottom:7px; }
+.field input,.field select,.field textarea{ font-family:var(--sans); resize:vertical; min-height:72px; }
 .field select{ font-family:var(--sans); }
 .field textarea{ font-family:var(--sans); resize:vertical; min-height:72px; }
 .field :focus{ border-color:var(--accent); background:var(--surface); outline:none; }
-.field .hint{ font:400 10.5px/1.4 var(--sans); color:var(--ink-faint); margin-top:4px; }
-.grid2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.field .hint{ font:400 11.5px/1.5 var(--sans); color:var(--ink-faint); margin-top:7px; }
+.grid2{ display:grid; grid-template-columns:1fr 1fr; gap:15px; align-items:start; }
 .swatches{ display:flex; gap:6px; flex-wrap:wrap; }
-.swatch{ flex:1; min-width:52px; padding:6px 4px; border-radius:var(--r-sm); border:1px solid var(--line);
-  background:var(--surface-2); color:var(--ink-dim); font:600 11px/1 var(--sans); cursor:pointer;
-  display:flex; flex-direction:column; align-items:center; gap:5px; touch-action:manipulation; }
+.swatch{ flex:1; min-width:52px; padding:7px 4px; border-radius:var(--r-sm); border:1px solid var(--line);
+  background:var(--surface-2); color:var(--ink-dim); font:600 11.5px/1 var(--sans); cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; gap:6px; touch-action:manipulation; }
 .swatch i{ width:100%; height:5px; border-radius:3px; }
 .swatch.on{ border-color:var(--accent); color:var(--ink); background:var(--surface); box-shadow:var(--sombra-sm); }
-.modal-foot{ padding:11px 16px 14px; display:flex; gap:8px; border-top:1px solid var(--line-soft); }
-.modal-foot .btn{ flex:1; height:40px; }
+.modal-foot{ padding:15px 22px 20px; display:flex; gap:10px; border-top:1px solid var(--line-soft); }
+.modal-foot .btn{ flex:1; height:46px; }
 
-.brujula{ display:flex; gap:12px; align-items:center; padding:10px; background:var(--surface-2);
+.brujula{ display:flex; gap:14px; align-items:center; padding:12px; background:var(--surface-2);
   border:1px solid var(--line); border-radius:var(--r); }
 .brujula .lect{ font:600 14px/1.7 var(--sans); }
 .brujula .lect small{ display:block; font:500 11px/1 var(--sans); color:var(--ink-faint); margin-bottom:3px; }
 
 /* fotos */
-.fotos{ display:flex; gap:7px; flex-wrap:wrap; }
-.foto{ position:relative; width:62px; height:62px; border-radius:var(--r-sm); overflow:hidden; border:1px solid var(--line); }
+.fotos{ display:flex; gap:9px; flex-wrap:wrap; }
+.foto{ position:relative; width:72px; height:72px; border-radius:var(--r-sm); overflow:hidden; border:1px solid var(--line); }
 .foto img{ width:100%; height:100%; object-fit:cover; display:block; }
 .foto .x{ position:absolute; top:3px; right:3px; width:22px; height:22px; border:0; border-radius:5px;
   background:rgba(24,26,28,.72); color:#fff; font-size:12px; cursor:pointer; }
@@ -975,20 +974,20 @@ aside{ width:var(--aside-w); flex:0 0 var(--aside-w); background:var(--surface);
 .zoombar .pct{ min-width:54px; height:32px; display:flex; align-items:center; justify-content:center;
   font:600 11px/1 var(--mono); color:var(--ink-dim); border-left:1px solid var(--line); border-right:1px solid var(--line); cursor:pointer; }
 .croquis-tira{ display:flex; gap:9px; flex-wrap:wrap; }
-.croquis-mini{ position:relative; width:86px; height:64px; border-radius:var(--r-sm); overflow:hidden;
+.croquis-mini{ position:relative; width:94px; height:70px; border-radius:var(--r-sm); overflow:hidden;
   border:1px solid var(--line); background:#fff; }
 .croquis-mini img{ width:100%; height:100%; object-fit:contain; display:block; cursor:pointer; }
 .croquis-mini .x{ position:absolute; top:3px; right:3px; width:22px; height:22px; border:0; border-radius:5px;
   background:rgba(24,26,28,.72); color:#fff; font-size:12px; cursor:pointer; }
-.croquis-add{ width:86px; height:64px; border-radius:var(--r-sm); border:1px dashed var(--line);
-  background:var(--surface-2); color:var(--ink-faint); font:550 10px/1.3 var(--sans); cursor:pointer;
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; }
+.croquis-add{ width:94px; height:70px; border-radius:var(--r-sm); border:1px dashed var(--line);
+  background:var(--surface-2); color:var(--ink-faint); font:550 10.5px/1.3 var(--sans); cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; }
 .croquis-add span{ font-size:18px; }
 @media (max-width:580px){ .lienzo-bar{ gap:6px; padding:7px 8px; } .tinta{ width:26px; height:26px; } }
 
-.foto-add{ width:62px; height:62px; border-radius:var(--r-sm); border:1px dashed var(--line);
-  background:var(--surface-2); color:var(--ink-faint); font:550 10px/1.3 var(--sans); cursor:pointer;
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; }
+.foto-add{ width:72px; height:72px; border-radius:var(--r-sm); border:1px dashed var(--line);
+  background:var(--surface-2); color:var(--ink-faint); font:550 10.5px/1.3 var(--sans); cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; }
 .foto-add span{ font-size:18px; }
 
 .visor{ position:fixed; inset:0; z-index:2500; background:rgba(20,22,24,.92); display:flex;
@@ -1032,9 +1031,9 @@ html[data-tema="oscuro"] .leaflet-control-attribution{ background:rgba(16,18,21,
 .pt-met-gne{ fill:url(#pt-met-gne)!important; fill-opacity:1!important; }
 .pt-met-cuar{ fill:url(#pt-met-cuar)!important; fill-opacity:1!important; }
 .pt-met-mar{ fill:url(#pt-met-mar)!important; fill-opacity:1!important; }
-.swatch i.trama{ width:100%; height:18px; border-radius:3px; overflow:hidden; border:1px solid var(--line); }
+.swatch i.trama{ width:100%; height:15px; border-radius:3px; overflow:hidden; border:1px solid var(--line); }
 .swatch i.trama svg{ display:block; width:100%; height:100%; }
-i.trama.vista{ display:block; width:100%; height:24px; margin-top:6px; border:1px solid var(--line); border-radius:4px; overflow:hidden; }
+i.trama.vista{ display:block; width:100%; height:34px; border:1px solid var(--line); border-radius:var(--r-sm); overflow:hidden; }
 i.trama.vista svg{ display:block; width:100%; height:100%; }
 .sim{ background:none!important; border:0!important; }
 .sim .etq{ position:absolute; font:650 11px/1 var(--mono); color:#fff;
@@ -1245,17 +1244,6 @@ i.trama.vista svg{ display:block; width:100%; height:100%; }
           <div class="rango" v-if="tiff"><button class="btn btn--sm btn--ghost" style="flex:1" @click="irAlTiff">Encuadrar TIFF</button></div>
           <hr />
           <button class="opt" :class="{on:tramas}" @click="tramas=!tramas; redibujarTodo()"><i></i>Tramas de roca (USGS)</button>
-          <hr />
-          <button class="opt" :class="{on:coloresAbierto}" @click="coloresAbierto=!coloresAbierto"><i></i>Colores por categoría</button>
-          <div class="colores" v-if="coloresAbierto">
-            <label class="colorrow" v-for="t in tiposRoca" :key="t">
-              <input type="color" v-model="colores.roca[t]" @input="aplicarColores" /><span>{{ t }}</span>
-            </label>
-            <label class="colorrow" v-for="c in cats.filter(x=>x.id!=='LT')" :key="c.id">
-              <input type="color" v-model="colores.cat[c.id]" @input="aplicarColores" /><span>{{ c.nombre }}</span>
-            </label>
-            <button class="btn btn--sm btn--ghost" style="width:100%;margin-top:6px" @click="restablecerColores">Restablecer</button>
-          </div>
         </div>
       </div>
 
@@ -1402,15 +1390,25 @@ i.trama.vista svg{ display:block; width:100%; height:100%; }
             <label>Tipo de roca</label>
             <div class="swatches">
               <button v-for="t in tiposRoca" :key="t" class="swatch" :class="{on:form.tipo_roca===t}" @click="elegirRoca(t)">
-                <i class="trama" v-html="svgTrama(patronPorDefecto(t))"></i>{{ t }}
+                <i class="trama" v-html="svgTrama(patronPorDefecto(t),form.color)"></i>{{ t }}
               </button>
             </div>
           </div>
-          <div class="field">
-            <label>Trama litológica (FGDC / USGS, sec. 37)</label>
-            <select v-model="form.patron"><option v-for="x in patronesDisponibles" :key="x.id" :value="x.id">{{ x.nombre }}</option></select>
-            <i class="trama vista" v-html="svgTrama(form.patron)"></i>
+
+          <div class="grid2">
+            <div class="field">
+              <label>Trama litológica (FGDC, sec. 37)</label>
+              <select v-model="form.patron"><option v-for="x in patronesDisponibles" :key="x.id" :value="x.id">{{ x.nombre }}</option></select>
+            </div>
+            <div class="field">
+              <label>Color de esta litología</label>
+              <div class="colorcampo">
+                <input type="color" v-model="form.color" />
+                <i class="trama vista" v-html="svgTrama(form.patron,form.color)"></i>
+              </div>
+            </div>
           </div>
+
           <div class="field"><label>Tipo de alteración</label>
             <select v-model="form.tipo_alteracion"><option v-for="a in alteraciones" :key="a">{{ a }}</option></select></div>
         </template>
@@ -1450,7 +1448,7 @@ i.trama.vista svg{ display:block; width:100%; height:100%; }
             <div class="field"><label>Buzamiento (°)</label><input type="number" min="0" max="90" v-model.number="form.buzamiento" /></div>
           </div>
           <div class="brujula">
-            <svg width="66" height="66" viewBox="-42 -42 84 84">
+            <svg width="72" height="72" viewBox="-42 -42 84 84">
               <circle r="38" fill="none" stroke="var(--line)" stroke-width="1.4"/>
               <text x="0" y="-29" text-anchor="middle" fill="var(--ink-faint)" font-family="monospace" font-size="9">N</text>
               <text x="31" y="4" text-anchor="middle" fill="var(--ink-faint)" font-family="monospace" font-size="9">E</text>
@@ -1634,7 +1632,6 @@ const CATS={
    líneas discontinuas alternadas para sedimentaria, esquistosidad
    inclinada para metamórfica. */
 const TIPOS_ROCA =['Ígnea','Sedimentaria','Metamórfica'];
-const COLOR_ROCA_BASE={'Ígnea':'#C4553D','Sedimentaria':'#C9A227','Metamórfica':'#7B6BA6'};
 const CLAVE_ROCA ={'Ígnea':'ign','Sedimentaria':'sed','Metamórfica':'met'};
 const COLOR_ROCA ={'Ígnea':'#C4553D','Sedimentaria':'#C9A227','Metamórfica':'#7B6BA6'};
 /* Patrones litológicos, agrupados por tipo de roca. El `id` apunta al
@@ -1716,7 +1713,6 @@ const CRS={
   'psad56-18s':{ id:'psad56-18s', nombre:'PSAD56 / UTM 18S',    corto:'PSAD56 18S',    tipo:'utm', datum:'PSAD56', zona:18, sur:true, epsg:'EPSG:24878' }
 };
 
-const CATS_BASE={FL:CATS.FL.color,ES:CATS.ES.color,MU:CATS.MU.color,CR:CATS.CR.color};
 const BASES={
   sat:{ nombre:'Satélite (Esri)', url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
         opts:{maxZoom:19,maxNativeZoom:18,attribution:'Imagery © Esri, Maxar, Earthstar Geographics'} },
@@ -1895,8 +1891,7 @@ createApp({
       CATS, CRS,
       cats:Object.values(CATS), listaCRS:Object.values(CRS),
       tiposRoca:TIPOS_ROCA, alteraciones:ALTERACIONES,
-      panelVisible:true, tramas:true, coloresAbierto:false,
-      colores:{ roca:Object.assign({},COLOR_ROCA), cat:{FL:CATS.FL.color,ES:CATS.ES.color,MU:CATS.MU.color,CR:CATS.CR.color} },
+      panelVisible:true, tramas:true,
       tiposFalla:TIPOS_FALLA, certezas:CERTEZAS, bloques:BLOQUES,
       tiposEstructura:TIPOS_ESTR, tiposMuestra:TIPOS_MUES, condiciones:CONDICIONES,
       tiposCroquis:TIPOS_CROQUIS, tintas:TINTAS, anchos:ANCHOS,
@@ -1955,9 +1950,6 @@ createApp({
     document.documentElement.dataset.tema=this.tema;
     this.crsActivo = almacen.leer('geomapper_crs')||'wgs84-17s';
     this.escalaTrabajo = +almacen.leer('geomapper_escala')||5000;
-    try{ const g=JSON.parse(almacen.leer('geomapper_colores')||'null');
-         if(g){ Object.assign(this.colores.roca,g.roca||{}); Object.assign(this.colores.cat,g.cat||{}); } }catch(e){}
-    this.aplicarColores();
     this.crearMapa(); this.asegurarPersistencia(); this.cargarDeAlmacen(); this.pedirUbicacion();
     window.addEventListener('keydown',this.atajos);
   },
@@ -1980,29 +1972,6 @@ createApp({
     ajustarAEscala(){
       const z=Math.log2(156543.03392*Math.cos(rad(this.centro.lat))/(this.escalaTrabajo*MM_POR_PX));
       map.setZoom(Math.max(map.getMinZoom(),Math.min(map.getMaxZoom(),z)));
-    },
-    /* Los colores elegidos se propagan a tres sitios: las variables CSS que
-       tiñen la interfaz, los objetos de catálogo que usa Leaflet, y las tramas
-       SVG, cuyos trazos hay que repintar uno a uno porque son elementos del DOM. */
-    aplicarColores(){
-      Object.keys(this.colores.cat).forEach(k=>{
-        CATS[k].color=this.colores.cat[k];
-        document.documentElement.style.setProperty('--c-'+k,this.colores.cat[k]);
-      });
-      Object.keys(this.colores.roca).forEach(t=>{
-        const col=this.colores.roca[t]; COLOR_ROCA[t]=col;
-        document.querySelectorAll('pattern[id^="pt-'+CLAVE_ROCA[t]+'-"] *').forEach(el=>{
-          if(el.hasAttribute('fill')   && el.getAttribute('fill')!=='none')   el.setAttribute('fill',col);
-          if(el.hasAttribute('stroke') && el.getAttribute('stroke')!=='none') el.setAttribute('stroke',col);
-        });
-      });
-      almacen.escribir('geomapper_colores',JSON.stringify(this.colores));
-      if(map) this.redibujarTodo();
-    },
-    restablecerColores(){
-      this.colores.roca=Object.assign({},COLOR_ROCA_BASE);
-      this.colores.cat={FL:CATS_BASE.FL,ES:CATS_BASE.ES,MU:CATS_BASE.MU,CR:CATS_BASE.CR};
-      this.aplicarColores();
     },
     fmt(n){ return String(Math.round(n||0)).replace(/\B(?=(\d{3})+(?!\d))/g,' '); },
 
@@ -2197,7 +2166,7 @@ createApp({
     abrirNuevo(cat,geometry,metrica,centro,rumboAuto){
       this.form={ abierto:true,id:null,categoria:cat,geometriaTmp:geometry,metrica,centro,
         nombre:'', notas:'', fotos:[], escala:this.escalaTrabajo,
-        tipo_roca:'Sedimentaria', patron:'sed-are', tipo_alteracion:'Sin alteración',
+        tipo_roca:'Sedimentaria', patron:'sed-are', color:'#000000', tipo_alteracion:'Sin alteración',
         tipo_falla:'Normal', certeza:'Observada', rumbo:rumboAuto, rumboAuto, lado_invertido:false,
         buzamiento:0, desplazamiento:null, bloque:'No definido',
         tipo_estructura:'Estratificación (S0)', convencion:'RHR',
@@ -2239,7 +2208,7 @@ createApp({
       const f=this.form, cat=f.categoria;
       const props={ categoria:cat, nombre:f.nombre||this.siguienteNombre(cat), escala:+f.escala||this.escalaTrabajo,
                     notas:f.notas||'', fotos:f.fotos, croquis:f.croquis||[] };
-      if(cat==='LT') Object.assign(props,{tipo_roca:f.tipo_roca,patron:f.patron||this.patronPorDefecto(f.tipo_roca),tipo_alteracion:f.tipo_alteracion});
+      if(cat==='LT') Object.assign(props,{tipo_roca:f.tipo_roca,color:f.color||'#000000',patron:f.patron||this.patronPorDefecto(f.tipo_roca),tipo_alteracion:f.tipo_alteracion});
       if(cat==='FL') Object.assign(props,{tipo_falla:f.tipo_falla,certeza:f.certeza,lado_invertido:!!f.lado_invertido,rumbo:+f.rumbo||0,
                                           buzamiento:+f.buzamiento||0,desplazamiento:f.desplazamiento,bloque:f.bloque});
       if(cat==='ES') Object.assign(props,{tipo_estructura:f.tipo_estructura,convencion:f.convencion,
@@ -2531,10 +2500,30 @@ createApp({
       this.features.forEach(f=>this.pintarFeature(f));
     },
     colorDe(f){ const p=f.properties;
-      return p.categoria==='LT' ? (COLOR_ROCA[p.tipo_roca]||CATS.LT.color) : CATS[p.categoria].color; },
+      return p.categoria==='LT' ? (p.color||'#000000') : CATS[p.categoria].color; },
     claveRoca(t){ return CLAVE_ROCA[t]||'sed'; },
+    /* Cada litología lleva su propio color, así que la trama base del estándar
+       se clona y se repinta una vez por combinación trama+color. El clon queda
+       en el <defs> y se reutiliza: dos polígonos del mismo color comparten uno. */
+    patronColoreado(patron,color){
+      const col=(color||'#000000').toLowerCase();
+      const id='pt-'+patron+'-'+col.replace('#','');
+      if(document.getElementById(id)) return id;
+      const base=document.getElementById('pt-'+patron);
+      if(!base) return 'pt-'+patron;
+      const clon=base.cloneNode(true); clon.id=id;
+      clon.querySelectorAll('*').forEach(el=>{
+        if(el.hasAttribute('fill')   && el.getAttribute('fill')!=='none')   el.setAttribute('fill',col);
+        if(el.hasAttribute('stroke') && el.getAttribute('stroke')!=='none') el.setAttribute('stroke',col);
+      });
+      base.parentNode.appendChild(clon);
+      return id;
+    },
     // Vista previa de una trama, para los botones y el selector del formulario
-    svgTrama(patron){ return '<svg viewBox="0 0 90 28" preserveAspectRatio="none"><rect width="90" height="28" fill="url(#pt-'+patron+')"/></svg>'; },
+    svgTrama(patron,color){
+      const id=this.patronColoreado(patron,color||'#000000');
+      return '<svg viewBox="0 0 90 28" preserveAspectRatio="none"><rect width="90" height="28" fill="url(#'+id+')"/></svg>';
+    },
     patronPorDefecto(tipo){ return PATRONES[this.claveRoca(tipo)][0].id; },
     // Al cambiar el tipo de roca, la trama salta al primer patrón de esa familia
     elegirRoca(t){ this.form.tipo_roca=t; this.form.patron=this.patronPorDefecto(t); },
@@ -2607,10 +2596,12 @@ createApp({
       const p=f.properties, g=f.geometry; let capa;
       if(g.type==='Polygon'){
         const ll=g.coordinates[0].slice(0,-1).map(c=>L.latLng(c[1],c[0]));
-        const col=COLOR_ROCA[p.tipo_roca]||CATS.LT.color;
-        capa=L.polygon(ll,{ color:col, weight:2.6, opacity:1, fillColor:col,
-          fillOpacity:this.tramas?1:.26,
-          className:this.tramas?('pt-'+(p.patron||this.patronPorDefecto(p.tipo_roca))):'' });
+        const col=p.color||'#000000';
+        capa=L.polygon(ll,{ color:col, weight:2.6, opacity:1, fillColor:col, fillOpacity:this.tramas?1:.26 });
+        if(this.tramas){
+          const id=this.patronColoreado(p.patron||this.patronPorDefecto(p.tipo_roca),col);
+          capa.once('add',()=>{ const el=capa.getElement(); if(el) el.style.fill='url(#'+id+')'; });
+        }
       }else if(g.type==='LineString'){
         const ll=g.coordinates.map(c=>L.latLng(c[1],c[0]));
         const halo=L.polyline(ll,{color:'#FFFFFF',weight:7,opacity:.75});   // realce sobre satélite
@@ -2833,6 +2824,7 @@ createApp({
         }
 
         if(!NOMBRE_PATRON[p.patron]) p.patron=PATRONES[CLAVE_ROCA[p.tipo_roca]||'sed'][0].id;
+        p.color=p.color||'#000000';
       }
       delete p.litologia; delete p.grado_alteracion;
       if(heredado.length) p.notas=(p.notas?p.notas+' · ':'')+heredado.join(' · ');
