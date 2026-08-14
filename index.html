@@ -994,6 +994,11 @@ html[data-tema="oscuro"] .leaflet-control-attribution{ background:rgba(16,18,21,
 .leaflet-container{ background:var(--bg); }
 .leaflet-control-zoom{ margin-top:64px!important; }
 .map-trazando .leaflet-container{ cursor:crosshair; }
+.tr-ign{ fill:url(#tr-ign)!important; fill-opacity:1!important; }
+.tr-sed{ fill:url(#tr-sed)!important; fill-opacity:1!important; }
+.tr-met{ fill:url(#tr-met)!important; fill-opacity:1!important; }
+.swatch i.trama{ width:100%; height:24px; border-radius:4px; overflow:hidden; border:1px solid var(--line); }
+.swatch i.trama svg{ display:block; width:100%; height:100%; }
 .sim{ background:none!important; border:0!important; }
 .sim .etq{ position:absolute; font:650 11px/1 var(--mono); color:#fff;
   text-shadow:0 0 3px rgba(20,22,24,.9),0 0 3px rgba(20,22,24,.9); white-space:nowrap; }
@@ -1021,6 +1026,23 @@ html[data-tema="oscuro"] .leaflet-control-attribution{ background:rgba(16,18,21,
 </head>
 
 <body>
+<!-- Tramas litológicas estilo FGDC/USGS. Se definen una vez y Leaflet
+     las referencia con fill:url(#id) desde su propio SVG. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <pattern id="tr-ign" width="18" height="18" patternUnits="userSpaceOnUse">
+    <rect width="18" height="18" fill="#C4553D" fill-opacity=".16"/>
+    <path d="M4.5 1.5 v6 M1.5 4.5 h6 M13.5 10.5 v6 M10.5 13.5 h6" stroke="#C4553D" stroke-width="1.5" fill="none"/>
+  </pattern>
+  <pattern id="tr-sed" width="20" height="12" patternUnits="userSpaceOnUse">
+    <rect width="20" height="12" fill="#C9A227" fill-opacity=".16"/>
+    <path d="M0 3 h11 M14 3 h6 M6 9 h11 M0 9 h3" stroke="#B08E1E" stroke-width="1.5" fill="none"/>
+  </pattern>
+  <pattern id="tr-met" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(38)">
+    <rect width="16" height="16" fill="#7B6BA6" fill-opacity=".16"/>
+    <path d="M1 3 h9 M6 9 h9 M0 15 h7" stroke="#7B6BA6" stroke-width="1.6" fill="none"/>
+  </pattern>
+</defs></svg>
+
 <div id="fallo"></div>
 <div id="app" v-cloak>
 
@@ -1049,6 +1071,10 @@ html[data-tema="oscuro"] .leaflet-control-attribution{ background:rgba(16,18,21,
     <button class="btn" @click="abrirIrA" title="Ir a una coordenada">⌖ <span class="lbl">Ir a punto</span></button>
     <button class="btn" :class="{'btn--on':soloLapiz}" @click="soloLapiz=!soloLapiz" title="Ignorar dedo y palma">✒ <span class="lbl">Lápiz</span></button>
     <button class="btn" :class="{'btn--on':gpsActivo}" @click="toggleGPS" title="Seguir posición GPS"><i class="dot"></i> <span class="lbl">GPS</span></button>
+    <button class="btn" :class="{'btn--on':!panelVisible}" @click="alternarPanel"
+            :title="panelVisible?'Ocultar el registro y usar todo el ancho para el mapa':'Mostrar el registro de campo'">
+      {{ panelVisible ? '⇥' : '⇤' }} <span class="lbl">Panel</span>
+    </button>
     <button class="btn btn--ghost" @click="alternarTema" :title="tema==='claro'?'Modo oscuro':'Modo claro'">{{ tema==='claro'?'◐':'◑' }}</button>
   </header>
 
@@ -1117,6 +1143,8 @@ html[data-tema="oscuro"] .leaflet-control-attribution{ background:rgba(16,18,21,
           <input ref="tif" type="file" accept=".tif,.tiff,image/tiff" style="display:none" @change="cargarTiff" />
           <div class="rango" v-if="tiff"><input type="range" min="0" max="100" v-model.number="tiffOpacidad" @input="aplicarOpacidadTiff" /><span>{{ tiffOpacidad }}%</span></div>
           <div class="rango" v-if="tiff"><button class="btn btn--sm btn--ghost" style="flex:1" @click="irAlTiff">Encuadrar TIFF</button></div>
+          <hr />
+          <button class="opt" :class="{on:tramas}" @click="tramas=!tramas; redibujarTodo()"><i></i>Tramas de roca (USGS)</button>
         </div>
       </div>
 
@@ -1133,7 +1161,7 @@ html[data-tema="oscuro"] .leaflet-control-attribution{ background:rgba(16,18,21,
     </div>
 
     <!-- ================= PANEL LATERAL ================= -->
-    <aside>
+    <aside v-if="panelVisible">
       <div class="aside-head">
         <div class="aside-title"><span>Registro de campo</span><em>{{ features.length }} registros</em></div>
         <div class="chips">
@@ -1248,7 +1276,9 @@ html[data-tema="oscuro"] .leaflet-control-attribution{ background:rgba(16,18,21,
 
       <div class="modal-body">
         <div class="grid2">
-          <div class="field"><label>Nombre / código</label><input v-model.trim="form.nombre" /></div>
+          <div class="field"><label>Nombre / código</label>
+            <input v-model.trim="form.nombre" :placeholder="nombreSugerido" />
+            <div class="hint">En blanco se asigna {{ nombreSugerido }}.</div></div>
           <div class="field">
             <label>Escala de mapeo</label>
             <select v-model.number="form.escala"><option v-for="e in escalas" :key="e" :value="e">1:{{ fmt(e) }}</option></select>
@@ -1258,17 +1288,15 @@ html[data-tema="oscuro"] .leaflet-control-attribution{ background:rgba(16,18,21,
 
         <template v-if="form.categoria==='LT'">
           <div class="field">
-            <label>Unidad</label>
+            <label>Tipo de roca</label>
             <div class="swatches">
-              <button v-for="u in unidades" :key="u" class="swatch" :class="{on:form.unidad===u}" @click="form.unidad=u">
-                <i :style="{background:COLORES[u]}"></i>{{ u }}
+              <button v-for="t in tiposRoca" :key="t" class="swatch" :class="{on:form.tipo_roca===t}" @click="form.tipo_roca=t">
+                <i class="trama" v-html="svgTrama(t)"></i>{{ t }}
               </button>
             </div>
           </div>
-          <div class="grid2">
-            <div class="field"><label>Litología</label><select v-model="form.litologia"><option v-for="l in litologias" :key="l">{{ l }}</option></select></div>
-            <div class="field"><label>Grado alteración</label><select v-model="form.grado_alteracion"><option v-for="g in grados" :key="g">{{ g }}</option></select></div>
-          </div>
+          <div class="field"><label>Tipo de alteración</label>
+            <select v-model="form.tipo_alteracion"><option v-for="a in alteraciones" :key="a">{{ a }}</option></select></div>
         </template>
 
         <template v-if="form.categoria==='FL'">
@@ -1316,7 +1344,7 @@ html[data-tema="oscuro"] .leaflet-control-attribution{ background:rgba(16,18,21,
           </div>
           <div class="grid2">
             <div class="field"><label>Unidad</label><select v-model="form.unidad"><option v-for="u in unidades" :key="u">{{ u }}</option></select></div>
-            <div class="field"><label>Litología</label><select v-model="form.litologia"><option v-for="l in litologias" :key="l">{{ l }}</option></select></div>
+            <div class="field"><label>Tipo de roca</label><select v-model="form.tipo_roca"><option v-for="t in tiposRoca" :key="t">{{ t }}</option></select></div>
           </div>
         </template>
 
@@ -1331,7 +1359,7 @@ html[data-tema="oscuro"] .leaflet-control-attribution{ background:rgba(16,18,21,
           </div>
           <div class="grid2">
             <div class="field"><label>Unidad</label><select v-model="form.unidad"><option v-for="u in unidades" :key="u">{{ u }}</option></select></div>
-            <div class="field"><label>Litología</label><select v-model="form.litologia"><option v-for="l in litologias" :key="l">{{ l }}</option></select></div>
+            <div class="field"><label>Tipo de roca</label><select v-model="form.tipo_roca"><option v-for="t in tiposRoca" :key="t">{{ t }}</option></select></div>
           </div>
           <div class="field"><label>Analito objetivo</label><input v-model.trim="form.analito" placeholder="P2O5, CaO, MgO…" /></div>
         </template>
@@ -1346,7 +1374,7 @@ html[data-tema="oscuro"] .leaflet-control-attribution{ background:rgba(16,18,21,
           </div>
           <div class="grid2">
             <div class="field"><label>Unidad</label><select v-model="form.unidad"><option v-for="u in unidades" :key="u">{{ u }}</option></select></div>
-            <div class="field"><label>Litología</label><select v-model="form.litologia"><option v-for="l in litologias" :key="l">{{ l }}</option></select></div>
+            <div class="field"><label>Tipo de roca</label><select v-model="form.tipo_roca"><option v-for="t in tiposRoca" :key="t">{{ t }}</option></select></div>
           </div>
         </template>
 
@@ -1406,6 +1434,9 @@ html[data-tema="oscuro"] .leaflet-control-attribution{ background:rgba(16,18,21,
         <button class="btn btn--sm" @click="deshacerTrazo" :disabled="!croquis.trazos.length">Deshacer</button>
         <button class="btn btn--sm btn--ghost" @click="limpiarLienzo">Limpiar</button>
         <button class="btn btn--sm" :class="{'btn--on':croquis.malla}" @click="alternarMalla">Malla</button>
+        <button class="btn btn--sm" :class="{'btn--on':croquis.conFondo}" @click="$refs.fondo.click()">▣ Foto base</button>
+        <button class="btn btn--sm btn--ghost" v-if="croquis.conFondo" @click="quitarFondo">Quitar foto</button>
+        <input ref="fondo" type="file" accept="image/*" capture="environment" style="display:none" @change="ponerFondo" />
         <span class="sp"></span>
         <button class="btn btn--sm btn--ghost" @click="croquis.abierto=false">Cancelar</button>
         <button class="btn btn--sm btn--primary" @click="guardarCroquis" :disabled="croquis.guardando">Guardar croquis</button>
@@ -1461,7 +1492,7 @@ const COLORES={ 'CA-1':'#4A7FB5','CA-2':'#5AA469','CA-3':'#C4553D','CA-4':'#D6B2
 const CATS={
   LT:{ id:'LT',nombre:'Litología',corto:'LT',geom:'Polygon',prefijo:'BAY-LT-',color:'#5AA469',
        glifo:'<svg viewBox="0 0 15 15" width="15" height="15"><path d="M1.5 4.5 L7.5 1.5 L13.5 5.5 L11.5 12.5 L3.5 11.5 Z" fill="currentColor" opacity=".38" stroke="currentColor" stroke-width="1.3"/></svg>',
-       ayuda:'Polígono de unidad / litología (tecla 1)' },
+       ayuda:'Polígono de tipo de roca (tecla 1)' },
   FL:{ id:'FL',nombre:'Falla',corto:'FL',geom:'LineString',prefijo:'BAY-FL-',color:'#C4553D',
        glifo:'<svg viewBox="0 0 15 15" width="15" height="15"><path d="M1.5 12.5 L5.5 7.5 L9.5 8.5 L13.5 2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>',
        ayuda:'Traza de falla o fractura mayor (tecla 2)' },
@@ -1477,8 +1508,16 @@ const CATS={
 };
 
 const UNIDADES   =['CA-1','CA-2','CA-3','CA-4','CA-5','Falla'];
-const LITOLOGIAS =['Fosfático','Arcilloso','Silíceo','Diatomita','Arenisca','Tufo','Coquina','Cobertura eólica'];
-const GRADOS     =['Bajo','Moderado','Alto'];
+/* Tipos de roca y su representación. Los colores siguen la convención de
+   mapa geológico (ígneas en rojo, sedimentarias en ocre, metamórficas en
+   violeta) y las tramas siguen el estilo FGDC/USGS: cruces para ígnea,
+   líneas discontinuas alternadas para sedimentaria, esquistosidad
+   inclinada para metamórfica. */
+const TIPOS_ROCA =['Ígnea','Sedimentaria','Metamórfica'];
+const CLAVE_ROCA ={'Ígnea':'ign','Sedimentaria':'sed','Metamórfica':'met'};
+const COLOR_ROCA ={'Ígnea':'#C4553D','Sedimentaria':'#C9A227','Metamórfica':'#7B6BA6'};
+const ALTERACIONES=['Sin alteración','Argílica','Fílica (sericítica)','Propilítica','Silicificación',
+                    'Potásica','Oxidación / limonitización','Carbonatización','Skarn'];
 const TIPOS_FALLA=['Normal','Inversa','Dextral','Sinestral','Oblicua','Indeterminada'];
 const CERTEZAS   =['Observada','Inferida','Cubierta'];
 const BLOQUES    =['No definido','Norte','Sur','Este','Oeste'];
@@ -1637,6 +1676,7 @@ let map=null, capaBase=null, capaEncima=null, capaTiff=null, marcaDestino=null;
 const capas={};
 let capaBorrador=null, vertBorrador=[], vertEdicion=[];
 let gpsMarcador=null, gpsPrecision=null, gpsWatchId=null, ultimaPos=null, ultimoClick=0;
+let fondoImg=null, fondoBlob=null;   // foto usada como base del croquis
 
 const almacen=(()=>{ let ok=true;
   try{ localStorage.setItem('__t','1'); localStorage.removeItem('__t'); }catch(e){ ok=false; }
@@ -1693,13 +1733,14 @@ createApp({
     return {
       CATS, COLORES, CRS,
       cats:Object.values(CATS), listaCRS:Object.values(CRS),
-      unidades:UNIDADES, litologias:LITOLOGIAS, grados:GRADOS,
+      unidades:UNIDADES, tiposRoca:TIPOS_ROCA, alteraciones:ALTERACIONES,
+      panelVisible:true, tramas:true,
       tiposFalla:TIPOS_FALLA, certezas:CERTEZAS, bloques:BLOQUES,
       tiposEstructura:TIPOS_ESTR, tiposMuestra:TIPOS_MUES, condiciones:CONDICIONES,
       tiposCroquis:TIPOS_CROQUIS, tintas:TINTAS, anchos:ANCHOS,
 
       croquis:{ abierto:false, color:'#1F2124', ancho:4, borrador:false, malla:true,
-                trazos:[], editandoId:null, guardando:false },
+                trazos:[], editandoId:null, guardando:false, conFondo:false, opacidadFondo:100 },
 
       tema:'claro',
       crsActivo:'wgs84-17s',
@@ -1740,6 +1781,7 @@ createApp({
     conteo(){ const c={LT:0,FL:0,ES:0,MU:0,CR:0}; this.features.forEach(f=>c[f.properties.categoria]++); return c; },
     visibles(){ return this.filtro==='TODO'?this.features:this.features.filter(f=>f.properties.categoria===this.filtro); },
     totalFotos(){ return this.features.reduce((s,f)=>s+((f.properties.fotos||[]).length)+((f.properties.croquis||[]).length),0); },
+    nombreSugerido(){ return this.form.categoria ? this.siguienteNombre(this.form.categoria) : ''; },
     strikeCalc(){ const r=+this.form.rumbo||0; return this.form.convencion==='DIP'?(r+270)%360:r; },
     rumboCardinal(){
       const dip=(this.strikeCalc+90)%360;
@@ -1772,6 +1814,12 @@ createApp({
     },
 
     fmt(n){ return String(Math.round(n||0)).replace(/\B(?=(\d{3})+(?!\d))/g,' '); },
+
+    // Al plegar el panel, Leaflet debe recalcular el tamaño del lienzo
+    alternarPanel(){
+      this.panelVisible=!this.panelVisible;
+      this.$nextTick(()=>setTimeout(()=>map.invalidateSize(),60));
+    },
 
     // Lleva la vista a la escala de mapeo declarada, resolviendo el zoom
     // fraccionario que corresponde a esa escala en esta latitud
@@ -1965,8 +2013,8 @@ createApp({
 
     abrirNuevo(cat,geometry,metrica,centro,rumboAuto){
       this.form={ abierto:true,id:null,categoria:cat,geometriaTmp:geometry,metrica,centro,
-        nombre:this.siguienteNombre(cat), notas:'', fotos:[], escala:this.escalaTrabajo,
-        unidad:'CA-1', litologia:'Fosfático', grado_alteracion:'Moderado',
+        nombre:'', notas:'', fotos:[], escala:this.escalaTrabajo,
+        unidad:'CA-1', tipo_roca:'Sedimentaria', tipo_alteracion:'Sin alteración',
         tipo_falla:'Normal', certeza:'Observada', rumbo:rumboAuto, rumboAuto,
         buzamiento:0, desplazamiento:null, bloque:'No definido',
         tipo_estructura:'Estratificación (S0)', convencion:'RHR',
@@ -2008,15 +2056,15 @@ createApp({
       const f=this.form, cat=f.categoria;
       const props={ categoria:cat, nombre:f.nombre||this.siguienteNombre(cat), escala:+f.escala||this.escalaTrabajo,
                     notas:f.notas||'', fotos:f.fotos, croquis:f.croquis||[] };
-      if(cat==='LT') Object.assign(props,{unidad:f.unidad,litologia:f.litologia,grado_alteracion:f.grado_alteracion});
+      if(cat==='LT') Object.assign(props,{tipo_roca:f.tipo_roca,tipo_alteracion:f.tipo_alteracion});
       if(cat==='FL') Object.assign(props,{tipo_falla:f.tipo_falla,certeza:f.certeza,rumbo:+f.rumbo||0,
                                           buzamiento:+f.buzamiento||0,desplazamiento:f.desplazamiento,bloque:f.bloque});
       if(cat==='ES') Object.assign(props,{tipo_estructura:f.tipo_estructura,convencion:f.convencion,
-                                          rumbo:+f.rumbo||0,buzamiento:+f.buzamiento||0,unidad:f.unidad,litologia:f.litologia});
+                                          rumbo:+f.rumbo||0,buzamiento:+f.buzamiento||0,unidad:f.unidad,tipo_roca:f.tipo_roca});
       if(cat==='MU') Object.assign(props,{tipo_muestra:f.tipo_muestra,condicion:f.condicion,longitud_m:f.longitud_m,
-                                          peso_kg:f.peso_kg,unidad:f.unidad,litologia:f.litologia,analito:f.analito});
+                                          peso_kg:f.peso_kg,unidad:f.unidad,tipo_roca:f.tipo_roca,analito:f.analito});
       if(cat==='CR') Object.assign(props,{tipo_croquis:f.tipo_croquis,azimut_vista:+f.azimut_vista||0,
-                                          unidad:f.unidad,litologia:f.litologia});
+                                          unidad:f.unidad,tipo_roca:f.tipo_roca});
       if(f.id){
         const t=this.features.find(x=>x.id===f.id);
         props.area_ha=t.properties.area_ha; props.largo_m=t.properties.largo_m;
@@ -2120,9 +2168,13 @@ createApp({
     async abrirCroquis(id){
       this.croquis.editandoId=id||null;
       this.croquis.trazos=[];
+      this.quitarFondo();
       if(id){
         try{ const reg=await fotoDB.obtener(id);
-             if(reg&&reg.trazos) this.croquis.trazos=JSON.parse(JSON.stringify(reg.trazos)); }catch(e){}
+             if(reg&&reg.trazos) this.croquis.trazos=JSON.parse(JSON.stringify(reg.trazos));
+             if(reg&&reg.fondo){ fondoBlob=reg.fondo; await this.cargarFondo(reg.fondo);
+                                 this.croquis.conFondo=true; this.croquis.malla=false; }
+        }catch(e){}
       }
       this.croquis.abierto=true;
       this.$nextTick(()=>this.montarLienzo());
@@ -2170,6 +2222,14 @@ createApp({
       ctx.save(); ctx.globalCompositeOperation='source-over';
       ctx.fillStyle='#FFFFFF'; ctx.fillRect(0,0,W,H);
 
+      if(fondoImg){                      // encaje "contain", sin deformar la foto
+        const e=Math.min(W/fondoImg.width,H/fondoImg.height);
+        const w=fondoImg.width*e, alt=fondoImg.height*e;
+        ctx.globalAlpha=this.croquis.opacidadFondo/100;
+        ctx.drawImage(fondoImg,(W-w)/2,(H-alt)/2,w,alt);
+        ctx.globalAlpha=1;
+      }
+
       if(this.croquis.malla){          // papel milimetrado: ayuda a guardar proporciones
         ctx.strokeStyle='#E8E6E0'; ctx.lineWidth=1;
         for(let x=0;x<=W;x+=40){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
@@ -2197,18 +2257,49 @@ createApp({
       ctx.globalCompositeOperation='source-over'; ctx.restore();
     },
 
+    /* Foto como base del croquis: se dibuja al fondo del lienzo y queda
+       incrustada en el PNG exportado. Útil para calcar contactos sobre la
+       foto del afloramiento en vez de dibujarlos de memoria. */
+    async ponerFondo(ev){
+      const file=ev.target.files[0]; ev.target.value=''; if(!file) return;
+      this.aviso('Cargando foto base…');
+      try{
+        fondoBlob=await this.reducir(file,1600,.85);
+        await this.cargarFondo(fondoBlob);
+        this.croquis.conFondo=true;
+        this.croquis.malla=false;          // la malla sobre una foto solo estorba
+        this.pintarLienzo();
+        this.aviso('Foto base lista · dibuja encima');
+      }catch(e){ console.error(e); this.aviso('No se pudo cargar la foto'); }
+    },
+
+    cargarFondo(blob){
+      return new Promise((ok,err)=>{
+        const img=new Image(), url=URL.createObjectURL(blob);
+        img.onload=()=>{ if(fondoImg&&fondoImg._url) URL.revokeObjectURL(fondoImg._url);
+                         img._url=url; fondoImg=img; ok(); };
+        img.onerror=()=>{ URL.revokeObjectURL(url); err(new Error('imagen')); };
+        img.src=url;
+      });
+    },
+
+    quitarFondo(){
+      if(fondoImg&&fondoImg._url) URL.revokeObjectURL(fondoImg._url);
+      fondoImg=null; fondoBlob=null; this.croquis.conFondo=false; this.pintarLienzo();
+    },
+
     deshacerTrazo(){ this.croquis.trazos.pop(); this.pintarLienzo(); },
     limpiarLienzo(){ if(this.croquis.trazos.length && confirm('¿Borrar todo el croquis?')){ this.croquis.trazos=[]; this.pintarLienzo(); } },
     alternarMalla(){ this.croquis.malla=!this.croquis.malla; this.pintarLienzo(); },
 
     async guardarCroquis(){
-      if(!this.croquis.trazos.length){ this.croquis.abierto=false; return; }
+      if(!this.croquis.trazos.length && !this.croquis.conFondo){ this.croquis.abierto=false; return; }
       this.croquis.guardando=true;
       try{
         const cv=this.$refs.cv;
         const blob=await new Promise(ok=>cv.toBlob(ok,'image/png'));
         const id=this.croquis.editandoId || ('s_'+Date.now()+'_'+Math.random().toString(36).slice(2,7));
-        await fotoDB.guardar(id,{ png:blob, trazos:JSON.parse(JSON.stringify(this.croquis.trazos)) });
+        await fotoDB.guardar(id,{ png:blob, trazos:JSON.parse(JSON.stringify(this.croquis.trazos)), fondo:fondoBlob||null });
         if(this.miniaturas[id]){ URL.revokeObjectURL(this.miniaturas[id]); delete this.miniaturas[id]; }
         if(!this.croquis.editandoId){
           this.form.croquis=this.form.croquis||[];
@@ -2234,15 +2325,19 @@ createApp({
       this.features.forEach(f=>this.pintarFeature(f));
     },
     colorDe(f){ const p=f.properties;
-      return p.categoria==='LT' ? (COLORES[p.unidad]||CATS.LT.color) : CATS[p.categoria].color; },
+      return p.categoria==='LT' ? (COLOR_ROCA[p.tipo_roca]||CATS.LT.color) : CATS[p.categoria].color; },
+    claveRoca(t){ return CLAVE_ROCA[t]||'sed'; },
+    // Muestra de la trama para los botones del formulario y la leyenda
+    svgTrama(t){ return '<svg viewBox="0 0 60 24" preserveAspectRatio="none"><rect width="60" height="24" fill="url(#tr-'+this.claveRoca(t)+')"/></svg>'; },
 
     pintarFeature(f){
       const p=f.properties, g=f.geometry; let capa;
       if(g.type==='Polygon'){
         const ll=g.coordinates[0].slice(0,-1).map(c=>L.latLng(c[1],c[0]));
-        const col=COLORES[p.unidad]||CATS.LT.color;
-        capa=L.polygon(ll,{color:col,weight:2.5,opacity:1,fillColor:col,fillOpacity:.26,
-          dashArray:p.unidad==='Falla'?'8,5':null});
+        const col=COLOR_ROCA[p.tipo_roca]||CATS.LT.color;
+        capa=L.polygon(ll,{ color:col, weight:2.6, opacity:1, fillColor:col,
+          fillOpacity:this.tramas?1:.26,
+          className:this.tramas?('tr-'+this.claveRoca(p.tipo_roca)):'' });
       }else if(g.type==='LineString'){
         const ll=g.coordinates.map(c=>L.latLng(c[1],c[0]));
         const halo=L.polyline(ll,{color:'#FFFFFF',weight:7,opacity:.75});   // realce sobre satélite
@@ -2295,7 +2390,7 @@ createApp({
     popup(f){
       const p=f.properties, c=this.centroDe(f);
       const l=['<b>'+p.nombre+'</b> <span style="color:var(--ink-faint)">'+CATS[p.categoria].nombre+'</span>'];
-      if(p.categoria==='LT') l.push(p.unidad+' · '+p.litologia+'<br>Alteración '+p.grado_alteracion+' · '+p.area_ha+' ha');
+      if(p.categoria==='LT') l.push(p.tipo_roca+'<br>'+p.tipo_alteracion+' · '+p.area_ha+' ha');
       if(p.categoria==='FL') l.push(p.tipo_falla+' · '+p.certeza+'<br>Azimut '+p.rumbo+'° / buz '+p.buzamiento+'° · '+p.largo_m+' m');
       if(p.categoria==='ES') l.push(p.tipo_estructura+'<br>'+(p.convencion==='DIP'?'Dir. buz ':'Rumbo ')+p.rumbo+'° / '+p.buzamiento+'°');
       if(p.categoria==='MU') l.push(p.tipo_muestra+' · '+p.condicion+'<br>'+(p.longitud_m?p.longitud_m+' m · ':'')+(p.analito||''));
@@ -2315,7 +2410,7 @@ createApp({
 
     resumen(f){
       const p=f.properties, g=s=>'<em>·</em> '+s;
-      if(p.categoria==='LT') return p.unidad+' '+g(p.litologia)+' '+g('alt. '+p.grado_alteracion)+' '+g(p.area_ha+' ha');
+      if(p.categoria==='LT') return p.tipo_roca+' '+g(p.tipo_alteracion)+' '+g(p.area_ha+' ha');
       if(p.categoria==='FL') return p.tipo_falla+' '+g(p.certeza)+' '+g(p.rumbo+'°/'+p.buzamiento+'°')+' '+g(p.largo_m+' m');
       if(p.categoria==='ES') return p.tipo_estructura+' '+g(p.rumbo+'°/'+p.buzamiento+'°')+' '+g(p.unidad);
       if(p.categoria==='CR') return p.tipo_croquis+' '+g((p.croquis||[]).length+' hoja(s)')+(p.azimut_vista?' '+g('vista '+p.azimut_vista+'°'):'');
@@ -2403,7 +2498,25 @@ createApp({
         p.area_ha=+areaHectareas(f.geometry.coordinates[0].slice(0,-1).map(c=>L.latLng(c[1],c[0]))).toFixed(2);
       if(f.geometry.type==='LineString'&&p.largo_m==null)
         p.largo_m=Math.round(largoMetros(f.geometry.coordinates.map(c=>L.latLng(c[1],c[0]))));
-      if(p.categoria==='LT'){ p.unidad=p.unidad||'CA-1'; p.litologia=p.litologia||'Fosfático'; p.grado_alteracion=p.grado_alteracion||'Moderado'; }
+      /* Compatibilidad con versiones anteriores: traían unidad, litología detallada
+         y grado de alteración. Lo que no encaje en los catálogos nuevos se conserva
+         en las notas en vez de perderse. */
+      const heredado=[];
+      if(!TIPOS_ROCA.includes(p.tipo_roca)){
+        if(p.tipo_roca) heredado.push('Litología previa: '+p.tipo_roca);
+        else if(p.litologia) heredado.push('Litología previa: '+p.litologia);
+        p.tipo_roca='Sedimentaria';
+      }
+      if(p.categoria==='LT'){
+        if(!ALTERACIONES.includes(p.tipo_alteracion)){
+          if(p.grado_alteracion) heredado.push('Grado de alteración previo: '+p.grado_alteracion);
+          p.tipo_alteracion='Sin alteración';
+        }
+        if(p.unidad) heredado.push('Unidad previa: '+p.unidad);
+        delete p.unidad;
+      }
+      delete p.litologia; delete p.grado_alteracion;
+      if(heredado.length) p.notas=(p.notas?p.notas+' · ':'')+heredado.join(' · ');
       if(p.categoria==='FL'){ p.tipo_falla=p.tipo_falla||'Indeterminada'; p.certeza=p.certeza||'Observada'; p.rumbo=p.rumbo??0; p.buzamiento=p.buzamiento??0; }
       if(p.categoria==='ES'){ p.tipo_estructura=p.tipo_estructura||'Estratificación (S0)'; p.convencion=p.convencion||'RHR'; p.rumbo=p.rumbo??0; p.buzamiento=p.buzamiento??0; }
       if(p.categoria==='MU'){ p.tipo_muestra=p.tipo_muestra||'Roca (grab)'; p.condicion=p.condicion||'In situ'; }
@@ -2425,7 +2538,7 @@ createApp({
     descargarCSV(){
       const s=CRS[this.crsActivo];
       const cols=['nombre','categoria','escala','geometria','sistema','este','norte','zona','lat_wgs84','lon_wgs84',
-        'unidad','litologia','grado_alteracion','tipo_falla','certeza','tipo_estructura','convencion','rumbo',
+        'unidad','tipo_roca','tipo_alteracion','tipo_falla','certeza','tipo_estructura','convencion','rumbo',
         'buzamiento','tipo_muestra','condicion','longitud_m','peso_kg','analito','tipo_croquis','azimut_vista',
         'area_ha','largo_m','fotos','croquis','notas'];
       const filas=[cols.join(',')];
