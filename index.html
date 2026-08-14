@@ -795,7 +795,16 @@ button,input,select,textarea{ font-family:inherit; color:inherit; }
 }
 .coords .read{ padding:9px 14px; font:600 14px/1.3 var(--mono); letter-spacing:.01em; white-space:nowrap; }
 .coords .read small{ display:block; font:500 9px/1 var(--sans); color:var(--ink-faint); letter-spacing:.06em; text-transform:uppercase; margin-bottom:4px; }
-.coords .zoom{ display:flex; align-items:center; padding:0 11px; border-left:1px solid var(--line); font:600 11px/1 var(--mono); color:var(--ink-faint); }
+.coords .esc{ display:flex; flex-direction:column; justify-content:center; gap:3px; padding:6px 10px;
+  border-left:1px solid var(--line); }
+.coords .esc small{ font:500 9px/1 var(--sans); color:var(--ink-faint); letter-spacing:.05em; text-transform:uppercase; }
+.coords .esc select{ border:1px solid var(--line); background:var(--surface-2); color:var(--ink);
+  border-radius:var(--r-sm); padding:3px 22px 3px 7px; font:600 12px/1 var(--mono); cursor:pointer;
+  appearance:none; touch-action:manipulation;
+  background-image:linear-gradient(45deg,transparent 50%,var(--ink-faint) 50%),linear-gradient(135deg,var(--ink-faint) 50%,transparent 50%);
+  background-position:calc(100% - 12px) 55%, calc(100% - 7px) 55%; background-size:5px 5px,5px 5px; background-repeat:no-repeat; }
+.coords .esc b{ font:600 9px/1 var(--mono); color:var(--ink-faint); }
+.coords .esc b.ojo{ color:var(--warn); }
 .coords .esc{ display:flex; align-items:stretch; border-left:1px solid var(--line); }
 .coords .esc .val{ display:flex; flex-direction:column; justify-content:center; padding:0 11px; cursor:pointer; touch-action:manipulation; }
 .coords .esc .val small{ font:500 9px/1 var(--sans); color:var(--ink-faint); letter-spacing:.06em; text-transform:uppercase; margin-bottom:4px; }
@@ -842,6 +851,11 @@ html[data-tema="oscuro"] .leaflet-control-scale-line{ background:rgba(16,18,21,.
 .layers-body .opt i{ width:7px; height:7px; border-radius:50%; background:currentColor; opacity:.3; flex:0 0 auto; }
 .layers-body .opt.on i{ opacity:1; }
 .layers-body hr{ border:0; border-top:1px solid var(--line-soft); margin:6px 3px; }
+.colores{ padding:4px 4px 2px; }
+.colorrow{ display:flex; align-items:center; gap:9px; height:34px; padding:0 5px; cursor:pointer; }
+.colorrow input[type=color]{ width:30px; height:22px; padding:0; border:1px solid var(--line);
+  border-radius:4px; background:none; cursor:pointer; flex:0 0 auto; }
+.colorrow span{ font:500 12px/1 var(--sans); color:var(--ink-dim); }
 .rango{ display:flex; align-items:center; gap:9px; padding:5px 9px 0; }
 .rango input[type=range]{ flex:1; accent-color:var(--accent); }
 .rango span{ font:600 11px/1 var(--mono); color:var(--ink-faint); width:34px; text-align:right; }
@@ -899,39 +913,37 @@ aside{ width:var(--aside-w); flex:0 0 var(--aside-w); background:var(--surface);
 /* ---------- Modal ---------- */
 .scrim{ position:fixed; inset:0; z-index:2000; background:rgba(24,26,28,.42);
   display:flex; align-items:center; justify-content:center; padding:16px; backdrop-filter:blur(3px); }
-.modal{ width:100%; max-width:500px; max-height:94dvh; overflow-y:auto; background:var(--surface);
-  border:1px solid var(--line); border-radius:14px; box-shadow:0 24px 64px rgba(24,26,28,.22); }
-.modal-head{ padding:18px 22px 15px; border-bottom:1px solid var(--line-soft); }
-.modal-head h2{ margin:0; font:650 16px/1.2 var(--sans); display:flex; align-items:center; gap:10px; }
+.modal{ width:100%; max-width:460px; max-height:92dvh; overflow-y:auto; background:var(--surface);
+  border:1px solid var(--line); border-radius:12px; box-shadow:0 20px 56px rgba(24,26,28,.22); }
+.modal-head{ padding:13px 16px 11px; border-bottom:1px solid var(--line-soft); }
+.modal-head h2{ margin:0; font:650 14px/1.2 var(--sans); display:flex; align-items:center; gap:8px; }
 .modal-head h2 i{ width:11px; height:11px; border-radius:3px; flex:0 0 auto; }
-.modal-head p{ margin:9px 0 0; font:400 12.5px/1.6 var(--mono); color:var(--ink-faint); }
-.modal-body{ padding:18px 22px; display:flex; flex-direction:column; gap:15px; }
-.field label{ display:block; font:600 12px/1 var(--sans); color:var(--ink-dim); margin-bottom:7px; }
-.field input,.field select,.field textarea{ width:100%; background:var(--surface-2); border:1px solid var(--line);
-  border-radius:var(--r-sm); padding:11px 12px; font-family:var(--mono); font-size:15px;
-  -webkit-user-select:text; user-select:text; }
+.modal-head p{ margin:6px 0 0; font:400 11px/1.45 var(--mono); color:var(--ink-faint); }
+.modal-body{ padding:13px 16px; display:flex; flex-direction:column; gap:10px; }
+.field label{ display:block; font:600 11px/1 var(--sans); color:var(--ink-dim); margin-bottom:4px; }
+.field input,.field select,.field textarea{ font-family:var(--sans); resize:vertical; min-height:54px; }
 .field select{ font-family:var(--sans); }
 .field textarea{ font-family:var(--sans); resize:vertical; min-height:72px; }
 .field :focus{ border-color:var(--accent); background:var(--surface); outline:none; }
-.field .hint{ font:400 11.5px/1.5 var(--sans); color:var(--ink-faint); margin-top:7px; }
-.grid2{ display:grid; grid-template-columns:1fr 1fr; gap:15px; }
+.field .hint{ font:400 10.5px/1.4 var(--sans); color:var(--ink-faint); margin-top:4px; }
+.grid2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .swatches{ display:flex; gap:6px; flex-wrap:wrap; }
-.swatch{ flex:1; min-width:56px; padding:9px 4px; border-radius:var(--r-sm); border:1px solid var(--line);
-  background:var(--surface-2); color:var(--ink-dim); font:600 12px/1 var(--sans); cursor:pointer;
-  display:flex; flex-direction:column; align-items:center; gap:7px; touch-action:manipulation; }
+.swatch{ flex:1; min-width:52px; padding:6px 4px; border-radius:var(--r-sm); border:1px solid var(--line);
+  background:var(--surface-2); color:var(--ink-dim); font:600 11px/1 var(--sans); cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; gap:5px; touch-action:manipulation; }
 .swatch i{ width:100%; height:5px; border-radius:3px; }
 .swatch.on{ border-color:var(--accent); color:var(--ink); background:var(--surface); box-shadow:var(--sombra-sm); }
-.modal-foot{ padding:15px 22px 20px; display:flex; gap:10px; border-top:1px solid var(--line-soft); }
-.modal-foot .btn{ flex:1; height:46px; }
+.modal-foot{ padding:11px 16px 14px; display:flex; gap:8px; border-top:1px solid var(--line-soft); }
+.modal-foot .btn{ flex:1; height:40px; }
 
-.brujula{ display:flex; gap:16px; align-items:center; padding:14px; background:var(--surface-2);
+.brujula{ display:flex; gap:12px; align-items:center; padding:10px; background:var(--surface-2);
   border:1px solid var(--line); border-radius:var(--r); }
 .brujula .lect{ font:600 14px/1.7 var(--sans); }
 .brujula .lect small{ display:block; font:500 11px/1 var(--sans); color:var(--ink-faint); margin-bottom:3px; }
 
 /* fotos */
-.fotos{ display:flex; gap:9px; flex-wrap:wrap; }
-.foto{ position:relative; width:80px; height:80px; border-radius:var(--r-sm); overflow:hidden; border:1px solid var(--line); }
+.fotos{ display:flex; gap:7px; flex-wrap:wrap; }
+.foto{ position:relative; width:62px; height:62px; border-radius:var(--r-sm); overflow:hidden; border:1px solid var(--line); }
 .foto img{ width:100%; height:100%; object-fit:cover; display:block; }
 .foto .x{ position:absolute; top:3px; right:3px; width:22px; height:22px; border:0; border-radius:5px;
   background:rgba(24,26,28,.72); color:#fff; font-size:12px; cursor:pointer; }
@@ -963,20 +975,20 @@ aside{ width:var(--aside-w); flex:0 0 var(--aside-w); background:var(--surface);
 .zoombar .pct{ min-width:54px; height:32px; display:flex; align-items:center; justify-content:center;
   font:600 11px/1 var(--mono); color:var(--ink-dim); border-left:1px solid var(--line); border-right:1px solid var(--line); cursor:pointer; }
 .croquis-tira{ display:flex; gap:9px; flex-wrap:wrap; }
-.croquis-mini{ position:relative; width:104px; height:78px; border-radius:var(--r-sm); overflow:hidden;
+.croquis-mini{ position:relative; width:86px; height:64px; border-radius:var(--r-sm); overflow:hidden;
   border:1px solid var(--line); background:#fff; }
 .croquis-mini img{ width:100%; height:100%; object-fit:contain; display:block; cursor:pointer; }
 .croquis-mini .x{ position:absolute; top:3px; right:3px; width:22px; height:22px; border:0; border-radius:5px;
   background:rgba(24,26,28,.72); color:#fff; font-size:12px; cursor:pointer; }
-.croquis-add{ width:104px; height:78px; border-radius:var(--r-sm); border:1px dashed var(--line);
-  background:var(--surface-2); color:var(--ink-faint); font:550 11px/1.4 var(--sans); cursor:pointer;
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; }
+.croquis-add{ width:86px; height:64px; border-radius:var(--r-sm); border:1px dashed var(--line);
+  background:var(--surface-2); color:var(--ink-faint); font:550 10px/1.3 var(--sans); cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; }
 .croquis-add span{ font-size:18px; }
 @media (max-width:580px){ .lienzo-bar{ gap:6px; padding:7px 8px; } .tinta{ width:26px; height:26px; } }
 
-.foto-add{ width:80px; height:80px; border-radius:var(--r-sm); border:1px dashed var(--line);
-  background:var(--surface-2); color:var(--ink-faint); font:550 11px/1.4 var(--sans); cursor:pointer;
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; }
+.foto-add{ width:62px; height:62px; border-radius:var(--r-sm); border:1px dashed var(--line);
+  background:var(--surface-2); color:var(--ink-faint); font:550 10px/1.3 var(--sans); cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; }
 .foto-add span{ font-size:18px; }
 
 .visor{ position:fixed; inset:0; z-index:2500; background:rgba(20,22,24,.92); display:flex;
@@ -1020,9 +1032,9 @@ html[data-tema="oscuro"] .leaflet-control-attribution{ background:rgba(16,18,21,
 .pt-met-gne{ fill:url(#pt-met-gne)!important; fill-opacity:1!important; }
 .pt-met-cuar{ fill:url(#pt-met-cuar)!important; fill-opacity:1!important; }
 .pt-met-mar{ fill:url(#pt-met-mar)!important; fill-opacity:1!important; }
-.swatch i.trama{ width:100%; height:24px; border-radius:4px; overflow:hidden; border:1px solid var(--line); }
+.swatch i.trama{ width:100%; height:18px; border-radius:3px; overflow:hidden; border:1px solid var(--line); }
 .swatch i.trama svg{ display:block; width:100%; height:100%; }
-i.trama.vista{ display:block; width:100%; height:34px; margin-top:9px; border:1px solid var(--line); border-radius:var(--r-sm); overflow:hidden; }
+i.trama.vista{ display:block; width:100%; height:24px; margin-top:6px; border:1px solid var(--line); border-radius:4px; overflow:hidden; }
 i.trama.vista svg{ display:block; width:100%; height:100%; }
 .sim{ background:none!important; border:0!important; }
 .sim .etq{ position:absolute; font:650 11px/1 var(--mono); color:#fff;
@@ -1194,7 +1206,13 @@ i.trama.vista svg{ display:block; width:100%; height:100%; }
           <small>{{ CRS[crsActivo].nombre }}</small>
           {{ lecturaCentro }}
         </div>
-        <div class="zoom">Z{{ zoomActual }}</div>
+        <div class="esc">
+          <small>Escala en pantalla</small>
+          <select v-model.number="escalaTrabajo" @change="ajustarAEscala" title="Ajusta el zoom a esta escala">
+            <option v-for="e in escalas" :key="e" :value="e">1:{{ fmt(e) }}</option>
+          </select>
+          <b :class="{ojo:escalaDesajustada}">≈1:{{ fmt(escalaPantalla) }}</b>
+        </div>
 
         <button class="pin" v-if="catActiva" @click="enCentro">
           + {{ CATS[catActiva].geom==='Point' ? CATS[catActiva].corto : 'Vértice' }}
@@ -1227,6 +1245,17 @@ i.trama.vista svg{ display:block; width:100%; height:100%; }
           <div class="rango" v-if="tiff"><button class="btn btn--sm btn--ghost" style="flex:1" @click="irAlTiff">Encuadrar TIFF</button></div>
           <hr />
           <button class="opt" :class="{on:tramas}" @click="tramas=!tramas; redibujarTodo()"><i></i>Tramas de roca (USGS)</button>
+          <hr />
+          <button class="opt" :class="{on:coloresAbierto}" @click="coloresAbierto=!coloresAbierto"><i></i>Colores por categoría</button>
+          <div class="colores" v-if="coloresAbierto">
+            <label class="colorrow" v-for="t in tiposRoca" :key="t">
+              <input type="color" v-model="colores.roca[t]" @input="aplicarColores" /><span>{{ t }}</span>
+            </label>
+            <label class="colorrow" v-for="c in cats.filter(x=>x.id!=='LT')" :key="c.id">
+              <input type="color" v-model="colores.cat[c.id]" @input="aplicarColores" /><span>{{ c.nombre }}</span>
+            </label>
+            <button class="btn btn--sm btn--ghost" style="width:100%;margin-top:6px" @click="restablecerColores">Restablecer</button>
+          </div>
         </div>
       </div>
 
@@ -1421,7 +1450,7 @@ i.trama.vista svg{ display:block; width:100%; height:100%; }
             <div class="field"><label>Buzamiento (°)</label><input type="number" min="0" max="90" v-model.number="form.buzamiento" /></div>
           </div>
           <div class="brujula">
-            <svg width="84" height="84" viewBox="-42 -42 84 84">
+            <svg width="66" height="66" viewBox="-42 -42 84 84">
               <circle r="38" fill="none" stroke="var(--line)" stroke-width="1.4"/>
               <text x="0" y="-29" text-anchor="middle" fill="var(--ink-faint)" font-family="monospace" font-size="9">N</text>
               <text x="31" y="4" text-anchor="middle" fill="var(--ink-faint)" font-family="monospace" font-size="9">E</text>
@@ -1436,10 +1465,7 @@ i.trama.vista svg{ display:block; width:100%; height:100%; }
               <span style="color:var(--ink-faint);font-weight:400">buza hacia {{ rumboCardinal }}</span>
             </div>
           </div>
-          <div class="grid2">
-            <div class="field"><label>Unidad</label><select v-model="form.unidad"><option v-for="u in unidades" :key="u">{{ u }}</option></select></div>
-            <div class="field"><label>Tipo de roca</label><select v-model="form.tipo_roca"><option v-for="t in tiposRoca" :key="t">{{ t }}</option></select></div>
-          </div>
+          <div class="field"><label>Tipo de roca</label><select v-model="form.tipo_roca"><option v-for="t in tiposRoca" :key="t">{{ t }}</option></select></div>
         </template>
 
         <template v-if="form.categoria==='MU'">
@@ -1451,10 +1477,7 @@ i.trama.vista svg{ display:block; width:100%; height:100%; }
             <div class="field"><label>Longitud / ancho (m)</label><input type="number" step="0.01" v-model.number="form.longitud_m" /></div>
             <div class="field"><label>Peso aprox. (kg)</label><input type="number" step="0.1" v-model.number="form.peso_kg" /></div>
           </div>
-          <div class="grid2">
-            <div class="field"><label>Unidad</label><select v-model="form.unidad"><option v-for="u in unidades" :key="u">{{ u }}</option></select></div>
-            <div class="field"><label>Tipo de roca</label><select v-model="form.tipo_roca"><option v-for="t in tiposRoca" :key="t">{{ t }}</option></select></div>
-          </div>
+          <div class="field"><label>Tipo de roca</label><select v-model="form.tipo_roca"><option v-for="t in tiposRoca" :key="t">{{ t }}</option></select></div>
           <div class="field"><label>Analito objetivo</label><input v-model.trim="form.analito" placeholder="P2O5, CaO, MgO…" /></div>
         </template>
 
@@ -1466,10 +1489,7 @@ i.trama.vista svg{ display:block; width:100%; height:100%; }
               <input type="number" min="0" max="360" v-model.number="form.azimut_vista" />
               <div class="hint">Hacia dónde mirabas al dibujar.</div></div>
           </div>
-          <div class="grid2">
-            <div class="field"><label>Unidad</label><select v-model="form.unidad"><option v-for="u in unidades" :key="u">{{ u }}</option></select></div>
-            <div class="field"><label>Tipo de roca</label><select v-model="form.tipo_roca"><option v-for="t in tiposRoca" :key="t">{{ t }}</option></select></div>
-          </div>
+          <div class="field"><label>Tipo de roca</label><select v-model="form.tipo_roca"><option v-for="t in tiposRoca" :key="t">{{ t }}</option></select></div>
         </template>
 
         <div class="field">
@@ -1589,7 +1609,6 @@ i.trama.vista svg{ display:block; width:100%; height:100%; }
    ============================================================ */
 const CENTRO=[-6.078,-80.832], ZOOM=13, CLAVE_LS='geomapper_v4', TOL_PX=2.5;
 
-const COLORES={ 'CA-1':'#4A7FB5','CA-2':'#5AA469','CA-3':'#C4553D','CA-4':'#D6B24B','CA-5':'#D98A45','Falla':'#3A3D42' };
 
 const CATS={
   LT:{ id:'LT',nombre:'Litología',corto:'LT',geom:'Polygon',prefijo:'LT-',color:'#5AA469',
@@ -1609,13 +1628,13 @@ const CATS={
        ayuda:'Croquis dibujado a mano en un punto (tecla 5)' }
 };
 
-const UNIDADES   =['CA-1','CA-2','CA-3','CA-4','CA-5','Falla'];
 /* Tipos de roca y su representación. Los colores siguen la convención de
    mapa geológico (ígneas en rojo, sedimentarias en ocre, metamórficas en
    violeta) y las tramas siguen el estilo FGDC/USGS: cruces para ígnea,
    líneas discontinuas alternadas para sedimentaria, esquistosidad
    inclinada para metamórfica. */
 const TIPOS_ROCA =['Ígnea','Sedimentaria','Metamórfica'];
+const COLOR_ROCA_BASE={'Ígnea':'#C4553D','Sedimentaria':'#C9A227','Metamórfica':'#7B6BA6'};
 const CLAVE_ROCA ={'Ígnea':'ign','Sedimentaria':'sed','Metamórfica':'met'};
 const COLOR_ROCA ={'Ígnea':'#C4553D','Sedimentaria':'#C9A227','Metamórfica':'#7B6BA6'};
 /* Patrones litológicos, agrupados por tipo de roca. El `id` apunta al
@@ -1679,6 +1698,7 @@ const LIENZO_W=1600, LIENZO_H=1100;
    (a 1:5 000, el grosor de un lápiz sobre el plano son ~2 m de terreno)
    y viaja con cada registro para que el modelador sepa qué tolerancia usar. */
 const ESCALAS=[200,500,1000,2000,2500,5000,10000,25000,50000];
+const MM_POR_PX=0.0002646;   // 1 px CSS = 1/96 pulgada
 
 /* ---------- Sistemas de coordenadas ----------
    La zona 17S viene preseleccionada. PSAD56 aparece porque buena parte de la
@@ -1696,6 +1716,7 @@ const CRS={
   'psad56-18s':{ id:'psad56-18s', nombre:'PSAD56 / UTM 18S',    corto:'PSAD56 18S',    tipo:'utm', datum:'PSAD56', zona:18, sur:true, epsg:'EPSG:24878' }
 };
 
+const CATS_BASE={FL:CATS.FL.color,ES:CATS.ES.color,MU:CATS.MU.color,CR:CATS.CR.color};
 const BASES={
   sat:{ nombre:'Satélite (Esri)', url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
         opts:{maxZoom:19,maxNativeZoom:18,attribution:'Imagery © Esri, Maxar, Earthstar Geographics'} },
@@ -1871,10 +1892,11 @@ const { createApp } = Vue;
 createApp({
   data(){
     return {
-      CATS, COLORES, CRS,
+      CATS, CRS,
       cats:Object.values(CATS), listaCRS:Object.values(CRS),
-      unidades:UNIDADES, tiposRoca:TIPOS_ROCA, alteraciones:ALTERACIONES,
-      panelVisible:true, tramas:true,
+      tiposRoca:TIPOS_ROCA, alteraciones:ALTERACIONES,
+      panelVisible:true, tramas:true, coloresAbierto:false,
+      colores:{ roca:Object.assign({},COLOR_ROCA), cat:{FL:CATS.FL.color,ES:CATS.ES.color,MU:CATS.MU.color,CR:CATS.CR.color} },
       tiposFalla:TIPOS_FALLA, certezas:CERTEZAS, bloques:BLOQUES,
       tiposEstructura:TIPOS_ESTR, tiposMuestra:TIPOS_MUES, condiciones:CONDICIONES,
       tiposCroquis:TIPOS_CROQUIS, tintas:TINTAS, anchos:ANCHOS,
@@ -1906,6 +1928,15 @@ createApp({
     basesDisponibles(){ return Object.keys(BASES).map(id=>({id,nombre:BASES[id].nombre})); },
     lecturaCentro(){ return textoCoord(this.centro.lat,this.centro.lng,this.crsActivo,false); },
 
+    /* Escala real en pantalla: se deriva de la resolución del mosaico en la
+       latitud actual, porque en Mercator la escala cambia con la latitud. */
+    escalaPantalla(){
+      const mpp=156543.03392*Math.cos(rad(this.centro.lat))/Math.pow(2,this.zoomActual);
+      const s=mpp/MM_POR_PX;
+      return s<10000?Math.round(s/10)*10:Math.round(s/100)*100;
+    },
+    escalaDesajustada(){ const r=this.escalaPantalla/this.escalaTrabajo; return r>1.6||r<0.62; },
+
     conteo(){ const c={LT:0,FL:0,ES:0,MU:0,CR:0}; this.features.forEach(f=>c[f.properties.categoria]++); return c; },
     visibles(){ return this.filtro==='TODO'?this.features:this.features.filter(f=>f.properties.categoria===this.filtro); },
     totalFotos(){ return this.features.reduce((s,f)=>s+((f.properties.fotos||[]).length)+((f.properties.croquis||[]).length),0); },
@@ -1924,6 +1955,9 @@ createApp({
     document.documentElement.dataset.tema=this.tema;
     this.crsActivo = almacen.leer('geomapper_crs')||'wgs84-17s';
     this.escalaTrabajo = +almacen.leer('geomapper_escala')||5000;
+    try{ const g=JSON.parse(almacen.leer('geomapper_colores')||'null');
+         if(g){ Object.assign(this.colores.roca,g.roca||{}); Object.assign(this.colores.cat,g.cat||{}); } }catch(e){}
+    this.aplicarColores();
     this.crearMapa(); this.asegurarPersistencia(); this.cargarDeAlmacen(); this.pedirUbicacion();
     window.addEventListener('keydown',this.atajos);
   },
@@ -1942,6 +1976,34 @@ createApp({
       this.redibujarTodo();
     },
 
+    // Lleva la vista a la escala elegida resolviendo el zoom fraccionario
+    ajustarAEscala(){
+      const z=Math.log2(156543.03392*Math.cos(rad(this.centro.lat))/(this.escalaTrabajo*MM_POR_PX));
+      map.setZoom(Math.max(map.getMinZoom(),Math.min(map.getMaxZoom(),z)));
+    },
+    /* Los colores elegidos se propagan a tres sitios: las variables CSS que
+       tiñen la interfaz, los objetos de catálogo que usa Leaflet, y las tramas
+       SVG, cuyos trazos hay que repintar uno a uno porque son elementos del DOM. */
+    aplicarColores(){
+      Object.keys(this.colores.cat).forEach(k=>{
+        CATS[k].color=this.colores.cat[k];
+        document.documentElement.style.setProperty('--c-'+k,this.colores.cat[k]);
+      });
+      Object.keys(this.colores.roca).forEach(t=>{
+        const col=this.colores.roca[t]; COLOR_ROCA[t]=col;
+        document.querySelectorAll('pattern[id^="pt-'+CLAVE_ROCA[t]+'-"] *').forEach(el=>{
+          if(el.hasAttribute('fill')   && el.getAttribute('fill')!=='none')   el.setAttribute('fill',col);
+          if(el.hasAttribute('stroke') && el.getAttribute('stroke')!=='none') el.setAttribute('stroke',col);
+        });
+      });
+      almacen.escribir('geomapper_colores',JSON.stringify(this.colores));
+      if(map) this.redibujarTodo();
+    },
+    restablecerColores(){
+      this.colores.roca=Object.assign({},COLOR_ROCA_BASE);
+      this.colores.cat={FL:CATS_BASE.FL,ES:CATS_BASE.ES,MU:CATS_BASE.MU,CR:CATS_BASE.CR};
+      this.aplicarColores();
+    },
     fmt(n){ return String(Math.round(n||0)).replace(/\B(?=(\d{3})+(?!\d))/g,' '); },
 
     // Al plegar el panel, Leaflet debe recalcular el tamaño del lienzo
@@ -1953,11 +2015,11 @@ createApp({
     /* ---------- 4.1 Mapa ---------- */
     crearMapa(){
       // Zoom por niveles enteros: el comportamiento estándar del mapa
-      map=L.map('map',{zoomControl:true,doubleClickZoom:true,tap:false,zoomSnap:1,zoomDelta:1}).setView(CENTRO,ZOOM);
+      map=L.map('map',{zoomControl:true,doubleClickZoom:true,tap:false,zoomSnap:0,zoomDelta:.5}).setView(CENTRO,ZOOM);
       L.control.scale({metric:true,imperial:false,maxWidth:120,position:'bottomright'}).addTo(map);
       this.cambiarBase(this.baseActiva);
       const sync=()=>{ const c=map.getCenter(); this.centro={lat:c.lat,lng:c.lng};
-        this.zoomActual=map.getZoom(); };
+        this.zoomActual=Math.round(map.getZoom()*10)/10; };
       map.on('move zoom',sync); sync();
       map.on('zoomend',()=>this.refrescarOrnamentos());
       map.on('click',this.clickMapa);
@@ -2135,7 +2197,7 @@ createApp({
     abrirNuevo(cat,geometry,metrica,centro,rumboAuto){
       this.form={ abierto:true,id:null,categoria:cat,geometriaTmp:geometry,metrica,centro,
         nombre:'', notas:'', fotos:[], escala:this.escalaTrabajo,
-        unidad:'CA-1', tipo_roca:'Sedimentaria', patron:'sed-are', tipo_alteracion:'Sin alteración',
+        tipo_roca:'Sedimentaria', patron:'sed-are', tipo_alteracion:'Sin alteración',
         tipo_falla:'Normal', certeza:'Observada', rumbo:rumboAuto, rumboAuto, lado_invertido:false,
         buzamiento:0, desplazamiento:null, bloque:'No definido',
         tipo_estructura:'Estratificación (S0)', convencion:'RHR',
@@ -2181,11 +2243,11 @@ createApp({
       if(cat==='FL') Object.assign(props,{tipo_falla:f.tipo_falla,certeza:f.certeza,lado_invertido:!!f.lado_invertido,rumbo:+f.rumbo||0,
                                           buzamiento:+f.buzamiento||0,desplazamiento:f.desplazamiento,bloque:f.bloque});
       if(cat==='ES') Object.assign(props,{tipo_estructura:f.tipo_estructura,convencion:f.convencion,
-                                          rumbo:+f.rumbo||0,buzamiento:+f.buzamiento||0,unidad:f.unidad,tipo_roca:f.tipo_roca});
+                                          rumbo:+f.rumbo||0,buzamiento:+f.buzamiento||0,tipo_roca:f.tipo_roca});
       if(cat==='MU') Object.assign(props,{tipo_muestra:f.tipo_muestra,condicion:f.condicion,longitud_m:f.longitud_m,
-                                          peso_kg:f.peso_kg,unidad:f.unidad,tipo_roca:f.tipo_roca,analito:f.analito});
+                                          peso_kg:f.peso_kg,tipo_roca:f.tipo_roca,analito:f.analito});
       if(cat==='CR') Object.assign(props,{tipo_croquis:f.tipo_croquis,azimut_vista:+f.azimut_vista||0,
-                                          unidad:f.unidad,tipo_roca:f.tipo_roca});
+                                          tipo_roca:f.tipo_roca});
       if(f.id){
         const t=this.features.find(x=>x.id===f.id);
         props.area_ha=t.properties.area_ha; props.largo_m=t.properties.largo_m;
@@ -2668,7 +2730,7 @@ createApp({
       const p=f.properties, g=s=>'<em>·</em> '+s;
       if(p.categoria==='LT') return (NOMBRE_PATRON[p.patron]||p.tipo_roca)+' '+g(p.tipo_roca)+' '+g(p.tipo_alteracion)+' '+g(p.area_ha+' ha');
       if(p.categoria==='FL') return p.tipo_falla+' '+g(p.certeza)+' '+g(p.rumbo+'°/'+p.buzamiento+'°')+' '+g(p.largo_m+' m');
-      if(p.categoria==='ES') return p.tipo_estructura+' '+g(p.rumbo+'°/'+p.buzamiento+'°')+' '+g(p.unidad);
+      if(p.categoria==='ES') return p.tipo_estructura+' '+g(p.rumbo+'°/'+p.buzamiento+'°')+' '+g(p.tipo_roca||'');
       if(p.categoria==='CR') return p.tipo_croquis+' '+g((p.croquis||[]).length+' hoja(s)')+(p.azimut_vista?' '+g('vista '+p.azimut_vista+'°'):'');
       return p.tipo_muestra+' '+g(p.condicion)+' '+(p.longitud_m?g(p.longitud_m+' m')+' ':'')+g(p.analito||'');
     },
@@ -2758,6 +2820,7 @@ createApp({
          y grado de alteración. Lo que no encaje en los catálogos nuevos se conserva
          en las notas en vez de perderse. */
       const heredado=[];
+      if(p.unidad){ heredado.push('Unidad previa: '+p.unidad); delete p.unidad; }
       if(!TIPOS_ROCA.includes(p.tipo_roca)){
         if(p.tipo_roca) heredado.push('Litología previa: '+p.tipo_roca);
         else if(p.litologia) heredado.push('Litología previa: '+p.litologia);
@@ -2768,8 +2831,7 @@ createApp({
           if(p.grado_alteracion) heredado.push('Grado de alteración previo: '+p.grado_alteracion);
           p.tipo_alteracion='Sin alteración';
         }
-        if(p.unidad) heredado.push('Unidad previa: '+p.unidad);
-        delete p.unidad;
+
         if(!NOMBRE_PATRON[p.patron]) p.patron=PATRONES[CLAVE_ROCA[p.tipo_roca]||'sed'][0].id;
       }
       delete p.litologia; delete p.grado_alteracion;
@@ -2795,7 +2857,7 @@ createApp({
     descargarCSV(){
       const s=CRS[this.crsActivo];
       const cols=['nombre','categoria','escala','geometria','sistema','este','norte','zona','lat_wgs84','lon_wgs84',
-        'unidad','tipo_roca','litologia_fgdc','tipo_alteracion','tipo_falla','certeza','tipo_estructura','convencion','rumbo',
+        'tipo_roca','litologia_fgdc','tipo_alteracion','tipo_falla','certeza','tipo_estructura','convencion','rumbo',
         'buzamiento','tipo_muestra','condicion','longitud_m','peso_kg','analito','tipo_croquis','azimut_vista',
         'area_ha','largo_m','fotos','croquis','notas'];
       const filas=[cols.join(',')];
