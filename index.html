@@ -953,9 +953,15 @@ aside{ width:var(--aside-w); flex:0 0 var(--aside-w); background:var(--surface);
   border-radius:var(--r-sm); background:none; cursor:pointer; touch-action:manipulation; }
 .grosor.on{ background:var(--surface); border-color:var(--accent); }
 .grosor i{ display:block; border-radius:50%; background:var(--ink); }
-.lienzo-area{ flex:1; min-height:0; display:grid; place-items:center; padding:14px; overflow:hidden; }
+.lienzo-area{ flex:1; min-height:0; display:flex; padding:14px; overflow:auto; }
 .lienzo-area canvas{ background:#fff; border:1px solid var(--line); border-radius:var(--r);
-  box-shadow:var(--sombra); max-width:100%; max-height:100%; touch-action:none; cursor:crosshair; }
+  box-shadow:var(--sombra); margin:auto; touch-action:none; cursor:crosshair; }
+.lienzo-area.mover canvas{ touch-action:auto; cursor:grab; }
+.zoombar{ display:flex; align-items:center; background:var(--surface-2); border:1px solid var(--line); border-radius:var(--r-sm); overflow:hidden; }
+.zoombar button{ width:34px; height:32px; border:0; background:none; color:var(--ink-dim); font:600 16px/1 var(--mono); cursor:pointer; touch-action:manipulation; }
+.zoombar button:hover{ background:var(--bg); color:var(--ink); }
+.zoombar .pct{ min-width:54px; height:32px; display:flex; align-items:center; justify-content:center;
+  font:600 11px/1 var(--mono); color:var(--ink-dim); border-left:1px solid var(--line); border-right:1px solid var(--line); cursor:pointer; }
 .croquis-tira{ display:flex; gap:9px; flex-wrap:wrap; }
 .croquis-mini{ position:relative; width:104px; height:78px; border-radius:var(--r-sm); overflow:hidden;
   border:1px solid var(--line); background:#fff; }
@@ -994,11 +1000,30 @@ html[data-tema="oscuro"] .leaflet-control-attribution{ background:rgba(16,18,21,
 .leaflet-container{ background:var(--bg); }
 .leaflet-control-zoom{ margin-top:64px!important; }
 .map-trazando .leaflet-container{ cursor:crosshair; }
-.tr-ign{ fill:url(#tr-ign)!important; fill-opacity:1!important; }
-.tr-sed{ fill:url(#tr-sed)!important; fill-opacity:1!important; }
-.tr-met{ fill:url(#tr-met)!important; fill-opacity:1!important; }
+.pt-ign-plut{ fill:url(#pt-ign-plut)!important; fill-opacity:1!important; }
+.pt-ign-volc{ fill:url(#pt-ign-volc)!important; fill-opacity:1!important; }
+.pt-ign-toba{ fill:url(#pt-ign-toba)!important; fill-opacity:1!important; }
+.pt-ign-brecha{ fill:url(#pt-ign-brecha)!important; fill-opacity:1!important; }
+.pt-sed-cgl{ fill:url(#pt-sed-cgl)!important; fill-opacity:1!important; }
+.pt-sed-are{ fill:url(#pt-sed-are)!important; fill-opacity:1!important; }
+.pt-sed-lim{ fill:url(#pt-sed-lim)!important; fill-opacity:1!important; }
+.pt-sed-lut{ fill:url(#pt-sed-lut)!important; fill-opacity:1!important; }
+.pt-sed-cal{ fill:url(#pt-sed-cal)!important; fill-opacity:1!important; }
+.pt-sed-dol{ fill:url(#pt-sed-dol)!important; fill-opacity:1!important; }
+.pt-sed-chert{ fill:url(#pt-sed-chert)!important; fill-opacity:1!important; }
+.pt-sed-fosf{ fill:url(#pt-sed-fosf)!important; fill-opacity:1!important; }
+.pt-sed-diat{ fill:url(#pt-sed-diat)!important; fill-opacity:1!important; }
+.pt-sed-yeso{ fill:url(#pt-sed-yeso)!important; fill-opacity:1!important; }
+.pt-sed-carb{ fill:url(#pt-sed-carb)!important; fill-opacity:1!important; }
+.pt-met-piz{ fill:url(#pt-met-piz)!important; fill-opacity:1!important; }
+.pt-met-esq{ fill:url(#pt-met-esq)!important; fill-opacity:1!important; }
+.pt-met-gne{ fill:url(#pt-met-gne)!important; fill-opacity:1!important; }
+.pt-met-cuar{ fill:url(#pt-met-cuar)!important; fill-opacity:1!important; }
+.pt-met-mar{ fill:url(#pt-met-mar)!important; fill-opacity:1!important; }
 .swatch i.trama{ width:100%; height:24px; border-radius:4px; overflow:hidden; border:1px solid var(--line); }
 .swatch i.trama svg{ display:block; width:100%; height:100%; }
+i.trama.vista{ display:block; width:100%; height:34px; margin-top:9px; border:1px solid var(--line); border-radius:var(--r-sm); overflow:hidden; }
+i.trama.vista svg{ display:block; width:100%; height:100%; }
 .sim{ background:none!important; border:0!important; }
 .sim .etq{ position:absolute; font:650 11px/1 var(--mono); color:#fff;
   text-shadow:0 0 3px rgba(20,22,24,.9),0 0 3px rgba(20,22,24,.9); white-space:nowrap; }
@@ -1026,20 +1051,87 @@ html[data-tema="oscuro"] .leaflet-control-attribution{ background:rgba(16,18,21,
 </head>
 
 <body>
-<!-- Tramas litológicas estilo FGDC/USGS. Se definen una vez y Leaflet
-     las referencia con fill:url(#id) desde su propio SVG. -->
+<!-- Tramas litológicas según la FGDC/USGS, Apéndice A Sección 37 -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-  <pattern id="tr-ign" width="18" height="18" patternUnits="userSpaceOnUse">
-    <rect width="18" height="18" fill="#C4553D" fill-opacity=".16"/>
-    <path d="M4.5 1.5 v6 M1.5 4.5 h6 M13.5 10.5 v6 M10.5 13.5 h6" stroke="#C4553D" stroke-width="1.5" fill="none"/>
+  <pattern id="pt-ign-plut" width="20" height="20" patternUnits="userSpaceOnUse">
+    <rect width="20" height="20" fill="#C4553D" fill-opacity=".14"/>
+    <path d="M5 2 v6 M2 5 h6 M15 11 v6 M12 14 h6" fill="none" stroke="#C4553D" stroke-width="1.5"/>
   </pattern>
-  <pattern id="tr-sed" width="20" height="12" patternUnits="userSpaceOnUse">
-    <rect width="20" height="12" fill="#C9A227" fill-opacity=".16"/>
-    <path d="M0 3 h11 M14 3 h6 M6 9 h11 M0 9 h3" stroke="#B08E1E" stroke-width="1.5" fill="none"/>
+  <pattern id="pt-ign-volc" width="22" height="14" patternUnits="userSpaceOnUse">
+    <rect width="22" height="14" fill="#C4553D" fill-opacity=".14"/>
+    <path d="M1 4 h8 M12 4 h9 M5 10 h8 M17 10 h5" fill="none" stroke="#C4553D" stroke-width="2.2"/>
   </pattern>
-  <pattern id="tr-met" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(38)">
-    <rect width="16" height="16" fill="#7B6BA6" fill-opacity=".16"/>
-    <path d="M1 3 h9 M6 9 h9 M0 15 h7" stroke="#7B6BA6" stroke-width="1.6" fill="none"/>
+  <pattern id="pt-ign-toba" width="20" height="16" patternUnits="userSpaceOnUse">
+    <rect width="20" height="16" fill="#C4553D" fill-opacity=".14"/>
+    <path d="M2 4 l3 6 l3 -6 M12 8 l3 6 l3 -6" fill="none" stroke="#C4553D" stroke-width="1.5"/>
+  </pattern>
+  <pattern id="pt-ign-brecha" width="24" height="24" patternUnits="userSpaceOnUse">
+    <rect width="24" height="24" fill="#C4553D" fill-opacity=".14"/>
+    <path d="M3 3 L11 5 L8 12 L2 9 Z M15 8 L22 11 L18 19 L12 16 Z" fill="none" stroke="#C4553D" stroke-width="1.4"/>
+  </pattern>
+  <pattern id="pt-sed-cgl" width="26" height="20" patternUnits="userSpaceOnUse">
+    <rect width="26" height="20" fill="#C9A227" fill-opacity=".14"/>
+    <ellipse cx="7" cy="6" rx="5" ry="3.4" fill="none" stroke="#B08E1E" stroke-width="1.4"/><ellipse cx="19" cy="14" rx="5.5" ry="3.6" fill="none" stroke="#B08E1E" stroke-width="1.4"/><ellipse cx="4" cy="16" rx="3.4" ry="2.4" fill="none" stroke="#B08E1E" stroke-width="1.4"/>
+  </pattern>
+  <pattern id="pt-sed-are" width="14" height="14" patternUnits="userSpaceOnUse">
+    <rect width="14" height="14" fill="#C9A227" fill-opacity=".14"/>
+    <circle cx="3" cy="3" r="1.5" fill="#B08E1E"/><circle cx="10" cy="7" r="1.5" fill="#B08E1E"/><circle cx="5" cy="11" r="1.5" fill="#B08E1E"/>
+  </pattern>
+  <pattern id="pt-sed-lim" width="16" height="12" patternUnits="userSpaceOnUse">
+    <rect width="16" height="12" fill="#C9A227" fill-opacity=".14"/>
+    <circle cx="3" cy="3" r="1" fill="#B08E1E"/><circle cx="11" cy="8" r="1" fill="#B08E1E"/><path d="M6 6 h5 M0 10 h4" fill="none" stroke="#B08E1E" stroke-width="1.2"/>
+  </pattern>
+  <pattern id="pt-sed-lut" width="22" height="10" patternUnits="userSpaceOnUse">
+    <rect width="22" height="10" fill="#C9A227" fill-opacity=".14"/>
+    <path d="M0 3 h12 M15 3 h7 M6 8 h12 M0 8 h3" fill="none" stroke="#B08E1E" stroke-width="1.6"/>
+  </pattern>
+  <pattern id="pt-sed-cal" width="28" height="16" patternUnits="userSpaceOnUse">
+    <rect width="28" height="16" fill="#C9A227" fill-opacity=".14"/>
+    <path d="M0 8 h28 M0 16 h28 M14 0 v8 M0 8 v8 M28 8 v8 M7 8 v8 M21 8 v8" fill="none" stroke="#B08E1E" stroke-width="1.4"/>
+  </pattern>
+  <pattern id="pt-sed-dol" width="28" height="16" patternUnits="userSpaceOnUse">
+    <rect width="28" height="16" fill="#C9A227" fill-opacity=".14"/>
+    <path d="M0 8 h28 M0 16 h28 M14 0 l4 8 M0 8 l4 8 M24 8 l4 8" fill="none" stroke="#B08E1E" stroke-width="1.4"/>
+  </pattern>
+  <pattern id="pt-sed-chert" width="18" height="18" patternUnits="userSpaceOnUse">
+    <rect width="18" height="18" fill="#C9A227" fill-opacity=".14"/>
+    <path d="M2 9 l4 -5 l4 5 M10 16 l4 -5 l4 5" fill="none" stroke="#B08E1E" stroke-width="1.4"/>
+  </pattern>
+  <pattern id="pt-sed-fosf" width="28" height="16" patternUnits="userSpaceOnUse">
+    <rect width="28" height="16" fill="#C9A227" fill-opacity=".14"/>
+    <path d="M0 8 h28 M0 16 h28 M14 0 v8 M0 8 v8 M28 8 v8" fill="none" stroke="#B08E1E" stroke-width="1.3"/><circle cx="7" cy="4" r="1.6" fill="#B08E1E"/><circle cx="21" cy="12" r="1.6" fill="#B08E1E"/>
+  </pattern>
+  <pattern id="pt-sed-diat" width="18" height="14" patternUnits="userSpaceOnUse">
+    <rect width="18" height="14" fill="#C9A227" fill-opacity=".14"/>
+    <path d="M0 4 h7 M11 4 h7 M4 10 h7" fill="none" stroke="#B08E1E" stroke-width="1.2"/><circle cx="9" cy="8" r="1.1" fill="#B08E1E"/><circle cx="15" cy="11" r="1.1" fill="#B08E1E"/>
+  </pattern>
+  <pattern id="pt-sed-yeso" width="18" height="18" patternUnits="userSpaceOnUse">
+    <rect width="18" height="18" fill="#C9A227" fill-opacity=".14"/>
+    <path d="M3 3 l6 6 M9 3 l-6 6 M12 10 l5 5 M17 10 l-5 5" fill="none" stroke="#B08E1E" stroke-width="1.3"/>
+  </pattern>
+  <pattern id="pt-sed-carb" width="12" height="12" patternUnits="userSpaceOnUse">
+    <rect width="12" height="12" fill="#C9A227" fill-opacity=".14"/>
+    <rect width="12" height="12" fill="#2A2A2A" fill-opacity=".78"/>
+  </pattern>
+  <pattern id="pt-met-piz" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+    <rect width="14" height="14" fill="#7B6BA6" fill-opacity=".14"/>
+    <path d="M0 3 h14 M0 8 h14 M0 13 h14" fill="none" stroke="#7B6BA6" stroke-width="1.3"/>
+  </pattern>
+  <pattern id="pt-met-esq" width="26" height="16" patternUnits="userSpaceOnUse">
+    <rect width="26" height="16" fill="#7B6BA6" fill-opacity=".14"/>
+    <path d="M0 5 q6 -4 12 0 q6 4 14 0 M0 13 q7 -4 13 0 q6 4 13 0" fill="none" stroke="#7B6BA6" stroke-width="1.5"/><ellipse cx="13" cy="9" rx="4" ry="1.6" fill="#7B6BA6" fill-opacity=".5"/>
+  </pattern>
+  <pattern id="pt-met-gne" width="26" height="18" patternUnits="userSpaceOnUse">
+    <rect width="26" height="18" fill="#7B6BA6" fill-opacity=".14"/>
+    <path d="M0 5 q6 -4 13 0 q7 4 13 0" fill="none" stroke="#7B6BA6" stroke-width="1.7"/><path d="M0 12 h9 M13 12 h8 M22 15 h4" fill="none" stroke="#7B6BA6" stroke-width="1.3"/>
+  </pattern>
+  <pattern id="pt-met-cuar" width="16" height="16" patternUnits="userSpaceOnUse">
+    <rect width="16" height="16" fill="#7B6BA6" fill-opacity=".14"/>
+    <path d="M0 5 h16 M0 12 h16" fill="none" stroke="#7B6BA6" stroke-width="1.2"/><circle cx="5" cy="8.5" r="1.3" fill="#7B6BA6"/><circle cx="12" cy="2" r="1.3" fill="#7B6BA6"/>
+  </pattern>
+  <pattern id="pt-met-mar" width="28" height="16" patternUnits="userSpaceOnUse">
+    <rect width="28" height="16" fill="#7B6BA6" fill-opacity=".14"/>
+    <path d="M0 8 h28 M0 16 h28 M14 0 v8 M0 8 v8 M28 8 v8" fill="none" stroke="#7B6BA6" stroke-width="1.3"/><path d="M2 6 l5 -5 M16 14 l5 -5" fill="none" stroke="#7B6BA6" stroke-width="1.1"/>
   </pattern>
 </defs></svg>
 
@@ -1103,16 +1195,6 @@ html[data-tema="oscuro"] .leaflet-control-attribution{ background:rgba(16,18,21,
           {{ lecturaCentro }}
         </div>
         <div class="zoom">Z{{ zoomActual }}</div>
-
-        <!-- Escala: lectura real en pantalla + escala de mapeo declarada -->
-        <div class="esc" :class="{desajuste: escalaDesajustada}">
-          <div class="val" @click="ajustarAEscala" :title="'Ajustar la vista a 1:'+escalaTrabajo">
-            <small>Pantalla</small><b>1:{{ fmt(escalaPantalla) }}</b>
-          </div>
-          <select v-model.number="escalaTrabajo" title="Escala de mapeo declarada para los registros nuevos">
-            <option v-for="e in escalas" :key="e" :value="e">1:{{ fmt(e) }}</option>
-          </select>
-        </div>
 
         <button class="pin" v-if="catActiva" @click="enCentro">
           + {{ CATS[catActiva].geom==='Point' ? CATS[catActiva].corto : 'Vértice' }}
@@ -1290,10 +1372,15 @@ html[data-tema="oscuro"] .leaflet-control-attribution{ background:rgba(16,18,21,
           <div class="field">
             <label>Tipo de roca</label>
             <div class="swatches">
-              <button v-for="t in tiposRoca" :key="t" class="swatch" :class="{on:form.tipo_roca===t}" @click="form.tipo_roca=t">
-                <i class="trama" v-html="svgTrama(t)"></i>{{ t }}
+              <button v-for="t in tiposRoca" :key="t" class="swatch" :class="{on:form.tipo_roca===t}" @click="elegirRoca(t)">
+                <i class="trama" v-html="svgTrama(patronPorDefecto(t))"></i>{{ t }}
               </button>
             </div>
+          </div>
+          <div class="field">
+            <label>Trama litológica (FGDC / USGS, sec. 37)</label>
+            <select v-model="form.patron"><option v-for="x in patronesDisponibles" :key="x.id" :value="x.id">{{ x.nombre }}</option></select>
+            <i class="trama vista" v-html="svgTrama(form.patron)"></i>
           </div>
           <div class="field"><label>Tipo de alteración</label>
             <select v-model="form.tipo_alteracion"><option v-for="a in alteraciones" :key="a">{{ a }}</option></select></div>
@@ -1436,12 +1523,20 @@ html[data-tema="oscuro"] .leaflet-control-attribution{ background:rgba(16,18,21,
         <button class="btn btn--sm" :class="{'btn--on':croquis.malla}" @click="alternarMalla">Malla</button>
         <button class="btn btn--sm" :class="{'btn--on':croquis.conFondo}" @click="$refs.fondo.click()">▣ Foto base</button>
         <button class="btn btn--sm btn--ghost" v-if="croquis.conFondo" @click="quitarFondo">Quitar foto</button>
+        <div class="zoombar">
+          <button @click="zoomLienzo(0.8)" title="Alejar">−</button>
+          <div class="pct" @click="ajustarLienzo" title="Ajustar a pantalla">{{ Math.round(croquis.zoom*100) }}%</div>
+          <button @click="zoomLienzo(1.25)" title="Acercar">+</button>
+        </div>
+        <button class="btn btn--sm btn--ghost" @click="ajustarLienzo">Ajustar</button>
+        <button class="btn btn--sm" :class="{'btn--on':croquis.mover}" @click="croquis.mover=!croquis.mover"
+                title="Mover el lienzo con el dedo en vez de dibujar">✋ Mover</button>
         <input ref="fondo" type="file" accept="image/*" capture="environment" style="display:none" @change="ponerFondo" />
         <span class="sp"></span>
         <button class="btn btn--sm btn--ghost" @click="croquis.abierto=false">Cancelar</button>
         <button class="btn btn--sm btn--primary" @click="guardarCroquis" :disabled="croquis.guardando">Guardar croquis</button>
       </div>
-      <div class="lienzo-area"><canvas ref="cv"></canvas></div>
+      <div class="lienzo-area" :class="{mover:croquis.mover}"><canvas ref="cv"></canvas></div>
     </div>
   </div>
 
@@ -1490,19 +1585,19 @@ const CENTRO=[-6.078,-80.832], ZOOM=13, CLAVE_LS='geomapper_v4', TOL_PX=2.5;
 const COLORES={ 'CA-1':'#4A7FB5','CA-2':'#5AA469','CA-3':'#C4553D','CA-4':'#D6B24B','CA-5':'#D98A45','Falla':'#3A3D42' };
 
 const CATS={
-  LT:{ id:'LT',nombre:'Litología',corto:'LT',geom:'Polygon',prefijo:'BAY-LT-',color:'#5AA469',
+  LT:{ id:'LT',nombre:'Litología',corto:'LT',geom:'Polygon',prefijo:'LT-',color:'#5AA469',
        glifo:'<svg viewBox="0 0 15 15" width="15" height="15"><path d="M1.5 4.5 L7.5 1.5 L13.5 5.5 L11.5 12.5 L3.5 11.5 Z" fill="currentColor" opacity=".38" stroke="currentColor" stroke-width="1.3"/></svg>',
        ayuda:'Polígono de tipo de roca (tecla 1)' },
-  FL:{ id:'FL',nombre:'Falla',corto:'FL',geom:'LineString',prefijo:'BAY-FL-',color:'#C4553D',
+  FL:{ id:'FL',nombre:'Falla',corto:'FL',geom:'LineString',prefijo:'FL-',color:'#C4553D',
        glifo:'<svg viewBox="0 0 15 15" width="15" height="15"><path d="M1.5 12.5 L5.5 7.5 L9.5 8.5 L13.5 2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>',
        ayuda:'Traza de falla o fractura mayor (tecla 2)' },
-  ES:{ id:'ES',nombre:'Estructural',corto:'ES',geom:'Point',prefijo:'BAY-ES-',color:'#4C7FB0',
+  ES:{ id:'ES',nombre:'Estructural',corto:'ES',geom:'Point',prefijo:'ES-',color:'#4C7FB0',
        glifo:'<svg viewBox="0 0 15 15" width="15" height="15"><line x1="1.5" y1="6" x2="13.5" y2="6" stroke="currentColor" stroke-width="2"/><line x1="7.5" y1="6" x2="7.5" y2="12.5" stroke="currentColor" stroke-width="2"/></svg>',
        ayuda:'Rumbo y buzamiento en un punto (tecla 3)' },
-  MU:{ id:'MU',nombre:'Muestra',corto:'MU',geom:'Point',prefijo:'BAY-MU-',color:'#C99334',
+  MU:{ id:'MU',nombre:'Muestra',corto:'MU',geom:'Point',prefijo:'MU-',color:'#C99334',
        glifo:'<svg viewBox="0 0 15 15" width="15" height="15"><path d="M7.5 1.5 L13.5 7.5 L7.5 13.5 L1.5 7.5 Z" fill="currentColor" opacity=".42" stroke="currentColor" stroke-width="1.4"/></svg>',
        ayuda:'Punto de muestreo (tecla 4)' },
-  CR:{ id:'CR',nombre:'Croquis',corto:'CR',geom:'Point',prefijo:'BAY-CR-',color:'#7B6BA6',
+  CR:{ id:'CR',nombre:'Croquis',corto:'CR',geom:'Point',prefijo:'CR-',color:'#7B6BA6',
        glifo:'<svg viewBox="0 0 15 15" width="15" height="15"><rect x="1.5" y="2.5" width="12" height="10" rx="1.4" fill="currentColor" opacity=".28" stroke="currentColor" stroke-width="1.3"/><path d="M3.5 10 L6 6.5 L8.5 9 L11.5 5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>',
        ayuda:'Croquis dibujado a mano en un punto (tecla 5)' }
 };
@@ -1516,6 +1611,32 @@ const UNIDADES   =['CA-1','CA-2','CA-3','CA-4','CA-5','Falla'];
 const TIPOS_ROCA =['Ígnea','Sedimentaria','Metamórfica'];
 const CLAVE_ROCA ={'Ígnea':'ign','Sedimentaria':'sed','Metamórfica':'met'};
 const COLOR_ROCA ={'Ígnea':'#C4553D','Sedimentaria':'#C9A227','Metamórfica':'#7B6BA6'};
+/* Patrones litológicos, agrupados por tipo de roca. El `id` apunta al
+   <pattern> SVG definido arriba en el documento. */
+const PATRONES={
+  ign:[ {id:'ign-plut',  nombre:'Intrusiva / plutónica (718)'},
+        {id:'ign-volc',  nombre:'Lava / roca volcánica (717)'},
+        {id:'ign-toba',  nombre:'Toba / piroclástica (711)'},
+        {id:'ign-brecha',nombre:'Brecha volcánica (715)'} ],
+  sed:[ {id:'sed-cgl',   nombre:'Conglomerado (601)'},
+        {id:'sed-are',   nombre:'Arenisca (607)'},
+        {id:'sed-lim',   nombre:'Limolita (616)'},
+        {id:'sed-lut',   nombre:'Lutita / arcillita (620)'},
+        {id:'sed-cal',   nombre:'Caliza (627)'},
+        {id:'sed-dol',   nombre:'Dolomía (642)'},
+        {id:'sed-chert', nombre:'Chert / sílice (649)'},
+        {id:'sed-fosf',  nombre:'Fosforita (666)'},
+        {id:'sed-diat',  nombre:'Diatomita (653)'},
+        {id:'sed-yeso',  nombre:'Yeso / evaporita (667)'},
+        {id:'sed-carb',  nombre:'Carbón (658)'} ],
+  met:[ {id:'met-piz',   nombre:'Pizarra (703)'},
+        {id:'met-esq',   nombre:'Esquisto (705)'},
+        {id:'met-gne',   nombre:'Gneis (708)'},
+        {id:'met-cuar',  nombre:'Cuarcita (702)'},
+        {id:'met-mar',   nombre:'Serpentinita / talco (710)'} ]
+};
+const NOMBRE_PATRON={}; Object.values(PATRONES).flat().forEach(x=>NOMBRE_PATRON[x.id]=x.nombre);
+
 const ALTERACIONES=['Sin alteración','Argílica','Fílica (sericítica)','Propilítica','Silicificación',
                     'Potásica','Oxidación / limonitización','Carbonatización','Skarn'];
 const TIPOS_FALLA=['Normal','Inversa','Dextral','Sinestral','Oblicua','Indeterminada'];
@@ -1538,10 +1659,9 @@ const LIENZO_W=1600, LIENZO_H=1100;
    (a 1:5 000, el grosor de un lápiz sobre el plano son ~2 m de terreno)
    y viaja con cada registro para que el modelador sepa qué tolerancia usar. */
 const ESCALAS=[200,500,1000,2000,2500,5000,10000,25000,50000];
-const MM_POR_PX=0.0002646;   // 1 px CSS = 1/96 pulgada
 
 /* ---------- Sistemas de coordenadas ----------
-   Bayóvar cae en la zona 17S. PSAD56 aparece porque buena parte de la
+   La zona 17S viene preseleccionada. PSAD56 aparece porque buena parte de la
    cartografía histórica peruana (cartas del IGN, planos antiguos de mina)
    está en ese datum; convertir mal produce corrimientos de ~350 m. */
 const DATUMS={
@@ -1739,7 +1859,7 @@ createApp({
       tiposEstructura:TIPOS_ESTR, tiposMuestra:TIPOS_MUES, condiciones:CONDICIONES,
       tiposCroquis:TIPOS_CROQUIS, tintas:TINTAS, anchos:ANCHOS,
 
-      croquis:{ abierto:false, color:'#1F2124', ancho:4, borrador:false, malla:true,
+      croquis:{ abierto:false, color:'#1F2124', ancho:4, borrador:false, malla:true, zoom:1, mover:false,
                 trazos:[], editandoId:null, guardando:false, conFondo:false, opacidadFondo:100 },
 
       tema:'claro',
@@ -1766,22 +1886,11 @@ createApp({
     basesDisponibles(){ return Object.keys(BASES).map(id=>({id,nombre:BASES[id].nombre})); },
     lecturaCentro(){ return textoCoord(this.centro.lat,this.centro.lng,this.crsActivo,false); },
 
-    /* Escala real en pantalla. Se deriva de la resolución del mosaico
-       en la latitud actual; en Mercator la escala cambia con la latitud. */
-    escalaPantalla(){
-      const mpp=156543.03392*Math.cos(rad(this.centro.lat))/Math.pow(2,this.zoomActual);
-      const s=mpp/MM_POR_PX;
-      return s<10000 ? Math.round(s/10)*10 : Math.round(s/100)*100;
-    },
-    // Avisa si estás dibujando muy lejos de la escala que declaraste
-    escalaDesajustada(){
-      const r=this.escalaPantalla/this.escalaTrabajo;
-      return r>2 || r<0.5;
-    },
     conteo(){ const c={LT:0,FL:0,ES:0,MU:0,CR:0}; this.features.forEach(f=>c[f.properties.categoria]++); return c; },
     visibles(){ return this.filtro==='TODO'?this.features:this.features.filter(f=>f.properties.categoria===this.filtro); },
     totalFotos(){ return this.features.reduce((s,f)=>s+((f.properties.fotos||[]).length)+((f.properties.croquis||[]).length),0); },
     nombreSugerido(){ return this.form.categoria ? this.siguienteNombre(this.form.categoria) : ''; },
+    patronesDisponibles(){ return PATRONES[CLAVE_ROCA[this.form.tipo_roca]||'sed']; },
     strikeCalc(){ const r=+this.form.rumbo||0; return this.form.convencion==='DIP'?(r+270)%360:r; },
     rumboCardinal(){
       const dip=(this.strikeCalc+90)%360;
@@ -1821,23 +1930,14 @@ createApp({
       this.$nextTick(()=>setTimeout(()=>map.invalidateSize(),60));
     },
 
-    // Lleva la vista a la escala de mapeo declarada, resolviendo el zoom
-    // fraccionario que corresponde a esa escala en esta latitud
-    ajustarAEscala(){
-      const z=Math.log2(156543.03392*Math.cos(rad(this.centro.lat))/(this.escalaTrabajo*MM_POR_PX));
-      map.setZoom(Math.max(map.getMinZoom(),Math.min(map.getMaxZoom(),z)));
-      this.aviso('Vista a 1:'+this.fmt(this.escalaTrabajo));
-    },
-
     /* ---------- 4.1 Mapa ---------- */
     crearMapa(){
-      // zoomSnap:0 permite zoom fraccionario, imprescindible para clavar una
-      // escala exacta (1:2 000 rara vez cae en un nivel de zoom entero)
-      map=L.map('map',{zoomControl:true,doubleClickZoom:true,tap:false,zoomSnap:0,zoomDelta:.5}).setView(CENTRO,ZOOM);
+      // Zoom por niveles enteros: el comportamiento estándar del mapa
+      map=L.map('map',{zoomControl:true,doubleClickZoom:true,tap:false,zoomSnap:1,zoomDelta:1}).setView(CENTRO,ZOOM);
       L.control.scale({metric:true,imperial:false,maxWidth:120,position:'bottomright'}).addTo(map);
       this.cambiarBase(this.baseActiva);
       const sync=()=>{ const c=map.getCenter(); this.centro={lat:c.lat,lng:c.lng};
-        this.zoomActual=Math.round(map.getZoom()*10)/10; };
+        this.zoomActual=map.getZoom(); };
       map.on('move zoom',sync); sync();
       map.on('click',this.clickMapa);
       map.on('dblclick',()=>{ if(this.capturando&&this.metodo==='vertice') this.cerrarGeometria(); });
@@ -2014,7 +2114,7 @@ createApp({
     abrirNuevo(cat,geometry,metrica,centro,rumboAuto){
       this.form={ abierto:true,id:null,categoria:cat,geometriaTmp:geometry,metrica,centro,
         nombre:'', notas:'', fotos:[], escala:this.escalaTrabajo,
-        unidad:'CA-1', tipo_roca:'Sedimentaria', tipo_alteracion:'Sin alteración',
+        unidad:'CA-1', tipo_roca:'Sedimentaria', patron:'sed-are', tipo_alteracion:'Sin alteración',
         tipo_falla:'Normal', certeza:'Observada', rumbo:rumboAuto, rumboAuto,
         buzamiento:0, desplazamiento:null, bloque:'No definido',
         tipo_estructura:'Estratificación (S0)', convencion:'RHR',
@@ -2056,7 +2156,7 @@ createApp({
       const f=this.form, cat=f.categoria;
       const props={ categoria:cat, nombre:f.nombre||this.siguienteNombre(cat), escala:+f.escala||this.escalaTrabajo,
                     notas:f.notas||'', fotos:f.fotos, croquis:f.croquis||[] };
-      if(cat==='LT') Object.assign(props,{tipo_roca:f.tipo_roca,tipo_alteracion:f.tipo_alteracion});
+      if(cat==='LT') Object.assign(props,{tipo_roca:f.tipo_roca,patron:f.patron||this.patronPorDefecto(f.tipo_roca),tipo_alteracion:f.tipo_alteracion});
       if(cat==='FL') Object.assign(props,{tipo_falla:f.tipo_falla,certeza:f.certeza,rumbo:+f.rumbo||0,
                                           buzamiento:+f.buzamiento||0,desplazamiento:f.desplazamiento,bloque:f.bloque});
       if(cat==='ES') Object.assign(props,{tipo_estructura:f.tipo_estructura,convencion:f.convencion,
@@ -2075,6 +2175,7 @@ createApp({
         if(g.type==='LineString') props.largo_m=Math.round(largoMetros(g.coordinates.map(c=>L.latLng(c[1],c[0]))));
         this.features.push({type:'Feature',id:props.nombre,geometry:g,properties:props});
       }
+      this.escalaTrabajo=props.escala;   // la última escala usada queda como predeterminada
       this.form.abierto=false; this.redibujarTodo(); this.persistir();
       this.aviso(props.nombre+' guardado');
     },
@@ -2184,11 +2285,11 @@ createApp({
       const cv=this.$refs.cv; if(!cv) return;
       const dpr=Math.min(window.devicePixelRatio||1,2);
       cv.width=LIENZO_W*dpr; cv.height=LIENZO_H*dpr;
-      cv.style.aspectRatio=LIENZO_W+' / '+LIENZO_H;
       const ctx=cv.getContext('2d');
       ctx.setTransform(dpr,0,0,dpr,0,0);
       ctx.lineCap='round'; ctx.lineJoin='round';
       this.pintarLienzo();
+      this.$nextTick(()=>this.ajustarLienzo());
       if(cv._listo) return; cv._listo=true;
 
       let trazo=null;
@@ -2199,6 +2300,7 @@ createApp({
                  p:e.pointerType==='pen'?Math.max(.25,e.pressure||.5):1 }; };
 
       cv.addEventListener('pointerdown',e=>{
+        if(this.croquis.mover) return;                        // modo mover: el dedo desplaza
         if(this.soloLapiz && e.pointerType!=='pen') return;   // rechazo de palma
         e.preventDefault(); cv.setPointerCapture(e.pointerId);
         trazo={ color:this.croquis.color, ancho:this.croquis.ancho,
@@ -2288,6 +2390,27 @@ createApp({
       fondoImg=null; fondoBlob=null; this.croquis.conFondo=false; this.pintarLienzo();
     },
 
+    /* Zoom del lienzo. El mapa de coordenadas usa getBoundingClientRect(),
+       que ya refleja el tamaño escalado, así que el trazo cae donde toca
+       en cualquier nivel de acercamiento. El desplazamiento lo hace el
+       propio contenedor con scroll. */
+    aplicarZoomLienzo(){
+      const cv=this.$refs.cv; if(!cv) return;
+      cv.style.width=(LIENZO_W*this.croquis.zoom)+'px';
+      cv.style.height=(LIENZO_H*this.croquis.zoom)+'px';
+    },
+    zoomLienzo(f){
+      this.croquis.zoom=Math.max(.1,Math.min(5,this.croquis.zoom*f));
+      this.aplicarZoomLienzo();
+    },
+    ajustarLienzo(){
+      const cv=this.$refs.cv; if(!cv||!cv.parentElement) return;
+      const a=cv.parentElement, pad=28;   // el padding del contenedor
+      const z=Math.min((a.clientWidth-pad)/LIENZO_W,(a.clientHeight-pad)/LIENZO_H);
+      this.croquis.zoom=Math.max(.1,Math.min(5,z));
+      this.aplicarZoomLienzo();
+    },
+
     deshacerTrazo(){ this.croquis.trazos.pop(); this.pintarLienzo(); },
     limpiarLienzo(){ if(this.croquis.trazos.length && confirm('¿Borrar todo el croquis?')){ this.croquis.trazos=[]; this.pintarLienzo(); } },
     alternarMalla(){ this.croquis.malla=!this.croquis.malla; this.pintarLienzo(); },
@@ -2327,8 +2450,11 @@ createApp({
     colorDe(f){ const p=f.properties;
       return p.categoria==='LT' ? (COLOR_ROCA[p.tipo_roca]||CATS.LT.color) : CATS[p.categoria].color; },
     claveRoca(t){ return CLAVE_ROCA[t]||'sed'; },
-    // Muestra de la trama para los botones del formulario y la leyenda
-    svgTrama(t){ return '<svg viewBox="0 0 60 24" preserveAspectRatio="none"><rect width="60" height="24" fill="url(#tr-'+this.claveRoca(t)+')"/></svg>'; },
+    // Vista previa de una trama, para los botones y el selector del formulario
+    svgTrama(patron){ return '<svg viewBox="0 0 90 28" preserveAspectRatio="none"><rect width="90" height="28" fill="url(#pt-'+patron+')"/></svg>'; },
+    patronPorDefecto(tipo){ return PATRONES[this.claveRoca(tipo)][0].id; },
+    // Al cambiar el tipo de roca, la trama salta al primer patrón de esa familia
+    elegirRoca(t){ this.form.tipo_roca=t; this.form.patron=this.patronPorDefecto(t); },
 
     pintarFeature(f){
       const p=f.properties, g=f.geometry; let capa;
@@ -2337,7 +2463,7 @@ createApp({
         const col=COLOR_ROCA[p.tipo_roca]||CATS.LT.color;
         capa=L.polygon(ll,{ color:col, weight:2.6, opacity:1, fillColor:col,
           fillOpacity:this.tramas?1:.26,
-          className:this.tramas?('tr-'+this.claveRoca(p.tipo_roca)):'' });
+          className:this.tramas?('pt-'+(p.patron||this.patronPorDefecto(p.tipo_roca))):'' });
       }else if(g.type==='LineString'){
         const ll=g.coordinates.map(c=>L.latLng(c[1],c[0]));
         const halo=L.polyline(ll,{color:'#FFFFFF',weight:7,opacity:.75});   // realce sobre satélite
@@ -2390,7 +2516,7 @@ createApp({
     popup(f){
       const p=f.properties, c=this.centroDe(f);
       const l=['<b>'+p.nombre+'</b> <span style="color:var(--ink-faint)">'+CATS[p.categoria].nombre+'</span>'];
-      if(p.categoria==='LT') l.push(p.tipo_roca+'<br>'+p.tipo_alteracion+' · '+p.area_ha+' ha');
+      if(p.categoria==='LT') l.push(p.tipo_roca+' · '+(NOMBRE_PATRON[p.patron]||'')+'<br>'+p.tipo_alteracion+' · '+p.area_ha+' ha');
       if(p.categoria==='FL') l.push(p.tipo_falla+' · '+p.certeza+'<br>Azimut '+p.rumbo+'° / buz '+p.buzamiento+'° · '+p.largo_m+' m');
       if(p.categoria==='ES') l.push(p.tipo_estructura+'<br>'+(p.convencion==='DIP'?'Dir. buz ':'Rumbo ')+p.rumbo+'° / '+p.buzamiento+'°');
       if(p.categoria==='MU') l.push(p.tipo_muestra+' · '+p.condicion+'<br>'+(p.longitud_m?p.longitud_m+' m · ':'')+(p.analito||''));
@@ -2410,7 +2536,7 @@ createApp({
 
     resumen(f){
       const p=f.properties, g=s=>'<em>·</em> '+s;
-      if(p.categoria==='LT') return p.tipo_roca+' '+g(p.tipo_alteracion)+' '+g(p.area_ha+' ha');
+      if(p.categoria==='LT') return (NOMBRE_PATRON[p.patron]||p.tipo_roca)+' '+g(p.tipo_roca)+' '+g(p.tipo_alteracion)+' '+g(p.area_ha+' ha');
       if(p.categoria==='FL') return p.tipo_falla+' '+g(p.certeza)+' '+g(p.rumbo+'°/'+p.buzamiento+'°')+' '+g(p.largo_m+' m');
       if(p.categoria==='ES') return p.tipo_estructura+' '+g(p.rumbo+'°/'+p.buzamiento+'°')+' '+g(p.unidad);
       if(p.categoria==='CR') return p.tipo_croquis+' '+g((p.croquis||[]).length+' hoja(s)')+(p.azimut_vista?' '+g('vista '+p.azimut_vista+'°'):'');
@@ -2514,6 +2640,7 @@ createApp({
         }
         if(p.unidad) heredado.push('Unidad previa: '+p.unidad);
         delete p.unidad;
+        if(!NOMBRE_PATRON[p.patron]) p.patron=PATRONES[CLAVE_ROCA[p.tipo_roca]||'sed'][0].id;
       }
       delete p.litologia; delete p.grado_alteracion;
       if(heredado.length) p.notas=(p.notas?p.notas+' · ':'')+heredado.join(' · ');
@@ -2538,7 +2665,7 @@ createApp({
     descargarCSV(){
       const s=CRS[this.crsActivo];
       const cols=['nombre','categoria','escala','geometria','sistema','este','norte','zona','lat_wgs84','lon_wgs84',
-        'unidad','tipo_roca','tipo_alteracion','tipo_falla','certeza','tipo_estructura','convencion','rumbo',
+        'unidad','tipo_roca','litologia_fgdc','tipo_alteracion','tipo_falla','certeza','tipo_estructura','convencion','rumbo',
         'buzamiento','tipo_muestra','condicion','longitud_m','peso_kg','analito','tipo_croquis','azimut_vista',
         'area_ha','largo_m','fotos','croquis','notas'];
       const filas=[cols.join(',')];
@@ -2547,6 +2674,7 @@ createApp({
         const v={ ...p, geometria:f.geometry.type, sistema:s.epsg||s.nombre,
           este:pr.tipo==='utm'?Math.round(pr.este):'', norte:pr.tipo==='utm'?Math.round(pr.norte):'',
           zona:pr.tipo==='utm'?pr.zona+pr.hemi:'', lat_wgs84:c.lat.toFixed(6), lon_wgs84:c.lng.toFixed(6),
+          litologia_fgdc:NOMBRE_PATRON[p.patron]||'',
           fotos:(p.fotos||[]).length, croquis:(p.croquis||[]).length };
         filas.push(cols.map(k=>{ const x=v[k]==null?'':String(v[k]);
           return /[",\n]/.test(x)?'"'+x.replace(/"/g,'""')+'"':x; }).join(','));
