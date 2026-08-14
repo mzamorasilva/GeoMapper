@@ -1400,6 +1400,13 @@ i.trama.vista svg{ display:block; width:100%; height:100%; }
             <div class="field"><label>Desplazamiento (m)</label><input type="number" step="0.1" v-model.number="form.desplazamiento" /></div>
             <div class="field"><label>Bloque hundido</label><select v-model="form.bloque"><option v-for="b in bloques" :key="b">{{ b }}</option></select></div>
           </div>
+          <div class="field">
+            <label>Lado del ornamento</label>
+            <button class="btn" style="width:100%" @click="form.lado_invertido=!form.lado_invertido">
+              {{ form.lado_invertido ? '↰ Invertido' : '↱ Por defecto' }}
+            </button>
+            <div class="hint">La barra y bola miran al bloque hundido; los dientes, al bloque cabalgante. Invierte si quedaron del lado contrario.</div>
+          </div>
         </template>
 
         <template v-if="form.categoria==='ES'">
@@ -1639,10 +1646,23 @@ const NOMBRE_PATRON={}; Object.values(PATRONES).flat().forEach(x=>NOMBRE_PATRON[
 
 const ALTERACIONES=['Sin alteración','Argílica','Fílica (sericítica)','Propilítica','Silicificación',
                     'Potásica','Oxidación / limonitización','Carbonatización','Skarn'];
-const TIPOS_FALLA=['Normal','Inversa','Dextral','Sinestral','Oblicua','Indeterminada'];
+const TIPOS_FALLA=['Normal','Inversa','Cabalgamiento','Dextral','Sinestral','Oblicua','Indeterminada'];
 const CERTEZAS   =['Observada','Inferida','Cubierta'];
 const BLOQUES    =['No definido','Norte','Sur','Este','Oeste'];
-const TIPOS_ESTR =['Estratificación (S0)','Contacto','Plano de falla','Diaclasa','Foliación','Lineación','Eje de pliegue','Veta'];
+/* Tipos de estructura y su símbolo. Las secciones citadas son las del
+   Apéndice A del estándar FGDC-STD-013-2006: 4 lineamientos y diaclasas,
+   5 pliegues, 6 estratificación, 7 clivaje, 8 foliación, 9 lineación. */
+const TIPOS_ESTR =['Estratificación (S0)','Contacto','Plano de falla','Diaclasa','Clivaje',
+                   'Foliación','Lineación','Eje de pliegue','Veta'];
+const SIMBOLO_SEC={ 'Estratificación (S0)':'Sec. 6','Contacto':'Sec. 1','Plano de falla':'Sec. 2',
+  'Diaclasa':'Sec. 4','Clivaje':'Sec. 7','Foliación':'Sec. 8','Lineación':'Sec. 9',
+  'Eje de pliegue':'Sec. 5','Veta':'Sec. 1' };
+
+/* Ornamentos de falla (Apéndice A, sección 2). Se dibujan repetidos a lo
+   largo de la traza y su lado indica el bloque: la barra y bola miran al
+   bloque hundido, los dientes al bloque cabalgante. */
+const TIPOS_FALLA_ORN={ 'Normal':'bolabarra','Inversa':'dientes','Cabalgamiento':'dientes',
+  'Dextral':'dextral','Sinestral':'sinestral','Oblicua':'mixto','Indeterminada':'ninguno' };
 const TIPOS_MUES =['Canal','Chip','Roca (grab)','Testigo','Suelo','Duplicado (QAQC)','Estándar (QAQC)','Blanco (QAQC)'];
 const CONDICIONES=['In situ','Talud','Rodado','Trinchera'];
 const TIPOS_CROQUIS=['Afloramiento','Perfil / sección','Detalle estructural','Canal de muestreo','Relación de corte','Otro'];
@@ -1939,6 +1959,7 @@ createApp({
       const sync=()=>{ const c=map.getCenter(); this.centro={lat:c.lat,lng:c.lng};
         this.zoomActual=map.getZoom(); };
       map.on('move zoom',sync); sync();
+      map.on('zoomend',()=>this.refrescarOrnamentos());
       map.on('click',this.clickMapa);
       map.on('dblclick',()=>{ if(this.capturando&&this.metodo==='vertice') this.cerrarGeometria(); });
       this.montarTrazo();
@@ -2115,7 +2136,7 @@ createApp({
       this.form={ abierto:true,id:null,categoria:cat,geometriaTmp:geometry,metrica,centro,
         nombre:'', notas:'', fotos:[], escala:this.escalaTrabajo,
         unidad:'CA-1', tipo_roca:'Sedimentaria', patron:'sed-are', tipo_alteracion:'Sin alteración',
-        tipo_falla:'Normal', certeza:'Observada', rumbo:rumboAuto, rumboAuto,
+        tipo_falla:'Normal', certeza:'Observada', rumbo:rumboAuto, rumboAuto, lado_invertido:false,
         buzamiento:0, desplazamiento:null, bloque:'No definido',
         tipo_estructura:'Estratificación (S0)', convencion:'RHR',
         tipo_muestra:'Canal', condicion:'In situ', longitud_m:null, peso_kg:null, analito:'P2O5',
@@ -2157,7 +2178,7 @@ createApp({
       const props={ categoria:cat, nombre:f.nombre||this.siguienteNombre(cat), escala:+f.escala||this.escalaTrabajo,
                     notas:f.notas||'', fotos:f.fotos, croquis:f.croquis||[] };
       if(cat==='LT') Object.assign(props,{tipo_roca:f.tipo_roca,patron:f.patron||this.patronPorDefecto(f.tipo_roca),tipo_alteracion:f.tipo_alteracion});
-      if(cat==='FL') Object.assign(props,{tipo_falla:f.tipo_falla,certeza:f.certeza,rumbo:+f.rumbo||0,
+      if(cat==='FL') Object.assign(props,{tipo_falla:f.tipo_falla,certeza:f.certeza,lado_invertido:!!f.lado_invertido,rumbo:+f.rumbo||0,
                                           buzamiento:+f.buzamiento||0,desplazamiento:f.desplazamiento,bloque:f.bloque});
       if(cat==='ES') Object.assign(props,{tipo_estructura:f.tipo_estructura,convencion:f.convencion,
                                           rumbo:+f.rumbo||0,buzamiento:+f.buzamiento||0,unidad:f.unidad,tipo_roca:f.tipo_roca});
@@ -2456,6 +2477,70 @@ createApp({
     // Al cambiar el tipo de roca, la trama salta al primer patrón de esa familia
     elegirRoca(t){ this.form.tipo_roca=t; this.form.patron=this.patronPorDefecto(t); },
 
+    /* Coloca el ornamento cada ~52 px de pantalla, orientado al rumbo local
+       del tramo. Se recalcula al hacer zoom porque el espaciado es en píxeles,
+       no en metros: así la traza se lee igual a cualquier escala. */
+    ornamentosFalla(ll,p){
+      const tipo=TIPOS_FALLA_ORN[p.tipo_falla]||'ninguno';
+      if(tipo==='ninguno'||ll.length<2) return [];
+      const lado = p.lado_invertido ? -1 : 1;
+      const pts = ll.map(c=>map.latLngToContainerPoint(c));
+      const paso = 52;
+      const marcas=[]; let resto=paso*0.6;
+
+      for(let i=1;i<pts.length;i++){
+        const a=pts[i-1], b=pts[i];
+        const dx=b.x-a.x, dy=b.y-a.y, largo=Math.hypot(dx,dy);
+        if(largo<1) continue;
+        const ang=Math.atan2(dy,dx)*180/Math.PI;
+        let d=resto;
+        while(d<largo){
+          const t=d/largo;
+          const pc=L.point(a.x+dx*t, a.y+dy*t);
+          marcas.push(L.marker(map.containerPointToLatLng(pc),{
+            interactive:false,
+            icon:L.divIcon({ className:'sim', iconSize:[40,40], iconAnchor:[20,20],
+              html:this.glifoFalla(tipo,ang,lado) })
+          }));
+          d+=paso;
+        }
+        resto=d-largo;
+      }
+      return marcas;
+    },
+
+    glifoFalla(tipo,ang,lado){
+      const c=CATS.FL.color, s=lado;   // s=1 dibuja hacia abajo del trazo
+      let cuerpo='';
+      if(tipo==='bolabarra')       // falla normal: bola y barra al bloque hundido
+        cuerpo='<circle cx="0" cy="0" r="3.4" fill="'+c+'" stroke="#fff" stroke-width="1"/>'
+              +'<line x1="0" y1="0" x2="0" y2="'+(9*s)+'" stroke="'+c+'" stroke-width="3"/>';
+      else if(tipo==='dientes')    // inversa o cabalgamiento: dientes al bloque cabalgante
+        cuerpo='<path d="M-5 0 L5 0 L0 '+(9*s)+' Z" fill="'+c+'" stroke="#fff" stroke-width="1"/>';
+      else if(tipo==='dextral'||tipo==='sinestral'){
+        const g=(tipo==='dextral')?1:-1;   // medias flechas opuestas: sentido del desplazamiento
+        cuerpo='<g stroke="'+c+'" stroke-width="2.4" fill="none" stroke-linecap="round">'
+              +'<path d="M'+(-11*g)+' -4 L'+(4*g)+' -4"/><path d="M'+(4*g)+' -4 L'+(0*g)+' -8"/>'
+              +'<path d="M'+(11*g)+' 4 L'+(-4*g)+' 4"/><path d="M'+(-4*g)+' 4 L'+(0*g)+' 8"/></g>';
+      }
+      else if(tipo==='mixto')      // oblicua: diente + media flecha
+        cuerpo='<path d="M-5 0 L5 0 L0 '+(8*s)+' Z" fill="'+c+'" stroke="#fff" stroke-width="1"/>'
+              +'<g stroke="'+c+'" stroke-width="2.2" fill="none" stroke-linecap="round">'
+              +'<path d="M-10 -5 L4 -5"/><path d="M4 -5 L0 -9"/></g>';
+      return '<svg width="40" height="40" viewBox="-20 -20 40 40" style="overflow:visible">'
+            +'<g transform="rotate('+ang+')">'+cuerpo+'</g></svg>';
+    },
+
+    // Al cambiar el zoom, el espaciado en píxeles deja de ser válido
+    refrescarOrnamentos(){
+      this.features.forEach(f=>{
+        if(f.properties.categoria!=='FL') return;
+        const capa=capas[f.id]; if(!capa||!capa._orn) return;
+        capa._orn.clearLayers();
+        this.ornamentosFalla(capa._ll,capa._props).forEach(m=>capa._orn.addLayer(m));
+      });
+    },
+
     pintarFeature(f){
       const p=f.properties, g=f.geometry; let capa;
       if(g.type==='Polygon'){
@@ -2467,9 +2552,12 @@ createApp({
       }else if(g.type==='LineString'){
         const ll=g.coordinates.map(c=>L.latLng(c[1],c[0]));
         const halo=L.polyline(ll,{color:'#FFFFFF',weight:7,opacity:.75});   // realce sobre satélite
+        // Certeza según la sección 2: continua = observada, guiones = inferida, puntos = cubierta
         const linea=L.polyline(ll,{color:CATS.FL.color,weight:3.4,opacity:1,
           dashArray:p.certeza==='Inferida'?'12,7':(p.certeza==='Cubierta'?'3,7':null)});
-        capa=L.layerGroup([halo,linea]); capa.getBounds=()=>linea.getBounds(); capa._principal=linea;
+        const orn=L.layerGroup(this.ornamentosFalla(ll,p));
+        capa=L.layerGroup([halo,linea,orn]); capa.getBounds=()=>linea.getBounds();
+        capa._principal=linea; capa._orn=orn; capa._ll=ll; capa._props=p;
       }else{
         const ll=L.latLng(g.coordinates[1],g.coordinates[0]);
         capa=L.marker(ll,{icon:L.divIcon({className:'sim',iconSize:[54,54],iconAnchor:[27,27],
@@ -2484,17 +2572,58 @@ createApp({
       capas[f.id]=capa;
     },
 
+    /* Símbolos estructurales del Apéndice A: estratificación (sec. 6),
+       clivaje (7), foliación (8), lineación (9), diaclasas (4), pliegues (5).
+       El SVG se rota (rumbo − 90) porque su línea base es horizontal, y el
+       halo blanco lo mantiene legible sobre imagen satelital. */
     simboloEstructural(p){
-      const strike=p.convencion==='DIP'?((+p.rumbo||0)+270)%360:(+p.rumbo||0);
-      const buz=+p.buzamiento||0, c=CATS.ES.color, vertical=buz>=85;
-      const cuerpo = vertical
-        ? '<line x1="-15" y1="0" x2="15" y2="0" stroke="'+c+'" stroke-width="3"/><line x1="0" y1="-7" x2="0" y2="7" stroke="'+c+'" stroke-width="3"/>'
-        : '<line x1="-15" y1="0" x2="15" y2="0" stroke="'+c+'" stroke-width="3"/><line x1="0" y1="0" x2="0" y2="9" stroke="'+c+'" stroke-width="3"/>';
-      const trazo=(p.tipo_estructura||'').indexOf('Foliación')===0?' stroke-dasharray="4,3"':'';
+      const strike = p.convencion==='DIP' ? ((+p.rumbo||0)+270)%360 : (+p.rumbo||0);
+      const buz=+p.buzamiento||0, t=p.tipo_estructura||'', c=CATS.ES.color;
+      const halo='<line x1="-15" y1="0" x2="15" y2="0" stroke="#FFFFFF" stroke-width="6.5" opacity=".9"/>';
+      const L_=(w,d)=>'<line x1="-15" y1="0" x2="15" y2="0" stroke="'+c+'" stroke-width="'+w+'"'+(d?' stroke-dasharray="'+d+'"':'')+'/>';
+      let cuerpo, etiqueta=Math.round(buz), rotar=true;
+
+      if(t.indexOf('Lineación')===0 || t.indexOf('Eje de pliegue')===0){
+        // Flecha en la dirección de inmersión, con el ángulo de inmersión al lado
+        const doble = t.indexOf('Eje')===0
+          ? '<path d="M0 9 L-4 3 M0 9 L4 3" fill="none" stroke="'+c+'" stroke-width="2.6"/>' : '';
+        cuerpo='<line x1="0" y1="-13" x2="0" y2="13" stroke="#FFFFFF" stroke-width="6.5" opacity=".9"/>'
+              +'<line x1="0" y1="-13" x2="0" y2="13" stroke="'+c+'" stroke-width="3"/>'
+              +'<path d="M0 13 L-4.5 6 M0 13 L4.5 6" fill="none" stroke="'+c+'" stroke-width="3"/>'+doble;
+        // en lineaciones el rumbo es la dirección de inmersión: no se resta 90
+        return '<svg width="54" height="54" viewBox="-27 -27 54 54" style="overflow:visible">'
+              +'<g transform="rotate('+((+p.rumbo||0)+180)+')">'+cuerpo+'</g></svg>'
+              +'<div class="etq" style="left:30px;top:16px">'+etiqueta+'</div>';
+      }
+
+      if(buz===0){                       // horizontal: cruz dentro de un círculo
+        cuerpo='<circle cx="0" cy="0" r="9" fill="none" stroke="#FFFFFF" stroke-width="6"/>'
+              +'<circle cx="0" cy="0" r="9" fill="none" stroke="'+c+'" stroke-width="2.6"/>'
+              +'<line x1="-13" y1="0" x2="13" y2="0" stroke="'+c+'" stroke-width="2.6"/>'
+              +'<line x1="0" y1="-13" x2="0" y2="13" stroke="'+c+'" stroke-width="2.6"/>';
+        etiqueta='';
+      } else if(buz>=89){                // vertical: marca a ambos lados
+        cuerpo=halo+L_(3)+'<line x1="0" y1="-7" x2="0" y2="7" stroke="'+c+'" stroke-width="3"/>';
+        etiqueta='90';
+      } else if(t.indexOf('Foliación')===0){
+        cuerpo=halo+L_(3)+'<line x1="0" y1="0" x2="0" y2="9" stroke="'+c+'" stroke-width="3"/>'
+              +'<line x1="-3.5" y1="9" x2="3.5" y2="9" stroke="'+c+'" stroke-width="2.4"/>';
+      } else if(t.indexOf('Clivaje')===0){
+        cuerpo=halo+L_(2.4,'5,3')+'<line x1="0" y1="0" x2="0" y2="9" stroke="'+c+'" stroke-width="2.4"/>';
+      } else if(t.indexOf('Diaclasa')===0){
+        cuerpo=halo+L_(2.4)+'<line x1="0" y1="0" x2="0" y2="7" stroke="'+c+'" stroke-width="2.4"/>'
+              +'<circle cx="0" cy="0" r="2.6" fill="#FFFFFF" stroke="'+c+'" stroke-width="1.8"/>';
+      } else if(t.indexOf('Plano de falla')===0){
+        cuerpo=halo+L_(3.6)+'<path d="M-4 9 L4 9 L0 2 Z" fill="'+c+'"/>';
+      } else if(t.indexOf('Veta')===0){
+        cuerpo=halo+L_(3)+'<path d="M0 0 L0 9 M-3 4.5 L3 4.5" stroke="'+c+'" stroke-width="2.4" fill="none"/>';
+      } else {                           // estratificación y contacto: símbolo básico
+        cuerpo=halo+L_(3)+'<line x1="0" y1="0" x2="0" y2="9" stroke="'+c+'" stroke-width="3"/>';
+      }
+
       return '<svg width="54" height="54" viewBox="-27 -27 54 54" style="overflow:visible">'
-        +'<g transform="rotate('+(strike-90)+')"'+trazo+'>'
-        +'<line x1="-15" y1="0" x2="15" y2="0" stroke="#FFFFFF" stroke-width="6" opacity=".85"/>'
-        +cuerpo+'</g></svg><div class="etq" style="left:30px;top:16px">'+Math.round(buz)+'</div>';
+            +'<g transform="rotate('+(strike-90)+')">'+cuerpo+'</g></svg>'
+            +(etiqueta!=='' ? '<div class="etq" style="left:30px;top:16px">'+etiqueta+'</div>' : '');
     },
     // Hoja con un trazo dentro; la flecha indica el azimut de vista si se declaró
     simboloCroquis(p){
@@ -2518,7 +2647,8 @@ createApp({
       const l=['<b>'+p.nombre+'</b> <span style="color:var(--ink-faint)">'+CATS[p.categoria].nombre+'</span>'];
       if(p.categoria==='LT') l.push(p.tipo_roca+' · '+(NOMBRE_PATRON[p.patron]||'')+'<br>'+p.tipo_alteracion+' · '+p.area_ha+' ha');
       if(p.categoria==='FL') l.push(p.tipo_falla+' · '+p.certeza+'<br>Azimut '+p.rumbo+'° / buz '+p.buzamiento+'° · '+p.largo_m+' m');
-      if(p.categoria==='ES') l.push(p.tipo_estructura+'<br>'+(p.convencion==='DIP'?'Dir. buz ':'Rumbo ')+p.rumbo+'° / '+p.buzamiento+'°');
+      if(p.categoria==='ES') l.push(p.tipo_estructura+' <span style="color:var(--ink-faint)">'+(SIMBOLO_SEC[p.tipo_estructura]||'')+'</span><br>'
+                                    +(p.convencion==='DIP'?'Dir. buz ':'Rumbo ')+p.rumbo+'° / '+p.buzamiento+'°');
       if(p.categoria==='MU') l.push(p.tipo_muestra+' · '+p.condicion+'<br>'+(p.longitud_m?p.longitud_m+' m · ':'')+(p.analito||''));
       if(p.categoria==='CR') l.push(p.tipo_croquis+(p.azimut_vista?'<br>Vista al '+p.azimut_vista+'°':''));
       if((p.croquis||[]).length) l.push('<span style="color:var(--c-CR)">✎ '+p.croquis.length+' croquis</span>');
@@ -2644,7 +2774,7 @@ createApp({
       }
       delete p.litologia; delete p.grado_alteracion;
       if(heredado.length) p.notas=(p.notas?p.notas+' · ':'')+heredado.join(' · ');
-      if(p.categoria==='FL'){ p.tipo_falla=p.tipo_falla||'Indeterminada'; p.certeza=p.certeza||'Observada'; p.rumbo=p.rumbo??0; p.buzamiento=p.buzamiento??0; }
+      if(p.categoria==='FL'){ p.lado_invertido=!!p.lado_invertido; p.tipo_falla=p.tipo_falla||'Indeterminada'; p.certeza=p.certeza||'Observada'; p.rumbo=p.rumbo??0; p.buzamiento=p.buzamiento??0; }
       if(p.categoria==='ES'){ p.tipo_estructura=p.tipo_estructura||'Estratificación (S0)'; p.convencion=p.convencion||'RHR'; p.rumbo=p.rumbo??0; p.buzamiento=p.buzamiento??0; }
       if(p.categoria==='MU'){ p.tipo_muestra=p.tipo_muestra||'Roca (grab)'; p.condicion=p.condicion||'In situ'; }
       if(p.categoria==='CR'){ p.tipo_croquis=p.tipo_croquis||'Afloramiento'; p.azimut_vista=p.azimut_vista??0; }
